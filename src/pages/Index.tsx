@@ -30,7 +30,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import o2conLogo from '@/assets/O2contole-LOGO.png';
+import o2conLogo from '@/assets/O2contole-logo.png';
 
 const Index = () => {
   const { alvaras, stats, addAlvara, updateAlvara, deleteAlvara } = useAlvaras();
@@ -143,7 +143,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <img 
-                src={o2conLogo} 
+                src={o2conLogo}
                 alt="O2con Soluções Contábeis" 
                 className="h-10 object-contain"
               />
