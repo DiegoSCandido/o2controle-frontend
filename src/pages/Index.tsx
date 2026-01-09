@@ -14,7 +14,7 @@ const Index = () => {
             />
             <div className="h-8 w-px bg-border" />
             <div>
-              <h1 className="text-lg font-bold text-foreground">Gestão de Alvarás</h1>
+              <h1 className="text-lg font-bold text-foreground">O2controle</h1>
               <p className="text-xs text-muted-foreground">
                 Controle de documentos e vencimentos
               </p>
