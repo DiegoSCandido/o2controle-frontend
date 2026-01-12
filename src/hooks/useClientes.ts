@@ -1,55 +1,70 @@
 import { useState, useEffect } from 'react';
 import { Cliente, ClienteFormData } from '@/types/cliente';
-import { generateId } from '@/lib/alvara-utils';
-
-const STORAGE_KEY = 'clientes-data';
+import { clienteAPI } from '@/lib/api-client';
 
 export function useClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from localStorage on mount
+  // Load clientes from API on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setClientes(parsed);
-      } catch (e) {
-        setClientes([]);
-      }
-    }
-    setIsLoading(false);
+    loadClientes();
   }, []);
 
-  // Save to localStorage when clientes change
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes));
+  const loadClientes = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await clienteAPI.list();
+      setClientes(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar clientes';
+      setError(message);
+      console.error('Erro ao carregar clientes:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [clientes, isLoading]);
-
-  const addCliente = (data: ClienteFormData) => {
-    const newCliente: Cliente = {
-      id: generateId(),
-      ...data,
-    };
-    setClientes((prev) => [...prev, newCliente]);
   };
 
-  const updateCliente = (id: string, data: ClienteFormData) => {
-    setClientes((prev) =>
-      prev.map((c) => {
-        if (c.id === id) {
-          return { ...c, ...data };
-        }
-        return c;
-      })
-    );
+  const addCliente = async (data: ClienteFormData) => {
+    try {
+      setError(null);
+      const newCliente = await clienteAPI.create(data);
+      setClientes((prev) => [...prev, newCliente]);
+      return newCliente;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar cliente';
+      setError(message);
+      throw err;
+    }
   };
 
-  const deleteCliente = (id: string) => {
-    setClientes((prev) => prev.filter((c) => c.id !== id));
+  const updateCliente = async (id: string, data: ClienteFormData) => {
+    try {
+      setError(null);
+      const updated = await clienteAPI.update(id, data);
+      setClientes((prev) =>
+        prev.map((c) => (c.id === id ? updated : c))
+      );
+      return updated;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar cliente';
+      setError(message);
+      throw err;
+    }
+  };
+
+  const deleteCliente = async (id: string) => {
+    try {
+      setError(null);
+      await clienteAPI.delete(id);
+      setClientes((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao deletar cliente';
+      setError(message);
+      throw err;
+    }
   };
 
   const getClienteById = (id: string): Cliente | undefined => {
@@ -59,9 +74,11 @@ export function useClientes() {
   return {
     clientes,
     isLoading,
+    error,
     addCliente,
     updateCliente,
     deleteCliente,
     getClienteById,
+    refetch: loadClientes,
   };
 }

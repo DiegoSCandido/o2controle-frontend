@@ -1,92 +1,93 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Alvara, AlvaraFormData, AlvaraStatus } from '@/types/alvara';
-import { calculateAlvaraStatus, generateId } from '@/lib/alvara-utils';
-
-const STORAGE_KEY = 'alvaras-data';
-
-// Sample data for demonstration - removido pois agora precisa de clienteId válido
-const sampleAlvaras: Alvara[] = [];
+import { calculateAlvaraStatus } from '@/lib/alvara-utils';
+import { alvaraAPI } from '@/lib/api-client';
 
 export function useAlvaras() {
   const [alvaras, setAlvaras] = useState<Alvara[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from localStorage on mount
+  // Load alvaras from API on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        // Recalculate status for each alvara
-        const updated = parsed.map((a: Alvara) => ({
-          ...a,
-          requestDate: new Date(a.requestDate),
-          issueDate: a.issueDate ? new Date(a.issueDate) : undefined,
-          expirationDate: a.expirationDate ? new Date(a.expirationDate) : undefined,
-          status: calculateAlvaraStatus(a),
-        }));
-        setAlvaras(updated);
-      } catch (e) {
-        setAlvaras(sampleAlvaras);
-      }
-    } else {
-      // Use sample data for demonstration
-      setAlvaras(sampleAlvaras.map((a) => ({ ...a, status: calculateAlvaraStatus(a) })));
-    }
-    setIsLoading(false);
+    loadAlvaras();
   }, []);
 
-  // Save to localStorage when alvaras change
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(alvaras));
+  const loadAlvaras = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await alvaraAPI.list();
+      // Recalculate status for each alvara
+      const updated = data.map((a: Alvara) => ({
+        ...a,
+        requestDate: new Date(a.requestDate),
+        issueDate: a.issueDate ? new Date(a.issueDate) : undefined,
+        expirationDate: a.expirationDate ? new Date(a.expirationDate) : undefined,
+        status: calculateAlvaraStatus(a),
+      }));
+      setAlvaras(updated);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar alvarás';
+      setError(message);
+      console.error('Erro ao carregar alvarás:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [alvaras, isLoading]);
-
-  const addAlvara = (data: AlvaraFormData, getClienteById?: (id: string) => { nomeFantasia: string; cnpj: string } | undefined) => {
-    const cliente = getClienteById?.(data.clienteId);
-    const newAlvara: Alvara = {
-      id: generateId(),
-      clienteId: data.clienteId,
-      clientName: cliente?.nomeFantasia || '',
-      clientCnpj: cliente?.cnpj || '',
-      type: data.type,
-      requestDate: data.requestDate,
-      issueDate: data.issueDate,
-      expirationDate: data.expirationDate,
-      notes: data.notes,
-      status: 'pending',
-    };
-    newAlvara.status = calculateAlvaraStatus(newAlvara);
-    setAlvaras((prev) => [...prev, newAlvara]);
   };
 
-  const updateAlvara = (id: string, data: AlvaraFormData, getClienteById?: (id: string) => { nomeFantasia: string; cnpj: string } | undefined) => {
-    setAlvaras((prev) =>
-      prev.map((a) => {
-        if (a.id === id) {
-          const cliente = getClienteById?.(data.clienteId);
-          const updated: Alvara = {
-            ...a,
-            clienteId: data.clienteId,
-            clientName: cliente?.nomeFantasia || a.clientName,
-            clientCnpj: cliente?.cnpj || a.clientCnpj,
-            type: data.type,
-            requestDate: data.requestDate,
-            issueDate: data.issueDate,
-            expirationDate: data.expirationDate,
-            notes: data.notes,
-          };
-          updated.status = calculateAlvaraStatus(updated);
-          return updated;
-        }
-        return a;
-      })
-    );
+  const addAlvara = async (data: AlvaraFormData) => {
+    try {
+      setError(null);
+      const newAlvara = await alvaraAPI.create(data);
+      const updated = {
+        ...newAlvara,
+        requestDate: new Date(newAlvara.requestDate),
+        issueDate: newAlvara.issueDate ? new Date(newAlvara.issueDate) : undefined,
+        expirationDate: newAlvara.expirationDate ? new Date(newAlvara.expirationDate) : undefined,
+        status: calculateAlvaraStatus(newAlvara),
+      };
+      setAlvaras((prev) => [...prev, updated]);
+      return updated;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar alvará';
+      setError(message);
+      throw err;
+    }
   };
 
-  const deleteAlvara = (id: string) => {
-    setAlvaras((prev) => prev.filter((a) => a.id !== id));
+  const updateAlvara = async (id: string, data: AlvaraFormData) => {
+    try {
+      setError(null);
+      const updatedAlvara = await alvaraAPI.update(id, data);
+      const updated = {
+        ...updatedAlvara,
+        requestDate: new Date(updatedAlvara.requestDate),
+        issueDate: updatedAlvara.issueDate ? new Date(updatedAlvara.issueDate) : undefined,
+        expirationDate: updatedAlvara.expirationDate ? new Date(updatedAlvara.expirationDate) : undefined,
+        status: calculateAlvaraStatus(updatedAlvara),
+      };
+      setAlvaras((prev) =>
+        prev.map((a) => (a.id === id ? updated : a))
+      );
+      return updated;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar alvará';
+      setError(message);
+      throw err;
+    }
+  };
+
+  const deleteAlvara = async (id: string) => {
+    try {
+      setError(null);
+      await alvaraAPI.delete(id);
+      setAlvaras((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao deletar alvará';
+      setError(message);
+      throw err;
+    }
   };
 
   const stats = useMemo(() => {
@@ -103,8 +104,10 @@ export function useAlvaras() {
     alvaras,
     stats,
     isLoading,
+    error,
     addAlvara,
     updateAlvara,
     deleteAlvara,
+    refetch: loadAlvaras,
   };
 }

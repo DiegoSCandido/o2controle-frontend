@@ -31,22 +31,30 @@ const ClientesPage = () => {
     });
   }, [clientes, searchTerm]);
 
-  const handleAddCliente = (data: ClienteFormData) => {
-    if (editingCliente) {
-      updateCliente(editingCliente.id, data);
+  const handleAddCliente = async (data: ClienteFormData) => {
+    try {
+      if (editingCliente) {
+        await updateCliente(editingCliente.id, data);
+        toast({
+          title: 'Cliente atualizado',
+          description: 'As alterações foram salvas com sucesso.',
+        });
+      } else {
+        await addCliente(data);
+        toast({
+          title: 'Cliente cadastrado',
+          description: 'O novo cliente foi adicionado ao sistema.',
+        });
+      }
+      setIsFormOpen(false);
+      setEditingCliente(null);
+    } catch (error) {
       toast({
-        title: 'Cliente atualizado',
-        description: 'As alterações foram salvas com sucesso.',
-      });
-    } else {
-      addCliente(data);
-      toast({
-        title: 'Cliente cadastrado',
-        description: 'O novo cliente foi adicionado ao sistema.',
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao salvar cliente',
+        variant: 'destructive',
       });
     }
-    setIsFormOpen(false);
-    setEditingCliente(null);
   };
 
   const handleEdit = (cliente: Cliente) => {
@@ -54,13 +62,21 @@ const ClientesPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteCliente(id);
-    toast({
-      title: 'Cliente removido',
-      description: 'O cliente foi excluído do sistema.',
-      variant: 'destructive',
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCliente(id);
+      toast({
+        title: 'Cliente removido',
+        description: 'O cliente foi excluído do sistema.',
+        variant: 'destructive',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao deletar cliente',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleOpenForm = () => {

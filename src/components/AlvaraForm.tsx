@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Alvara, AlvaraFormData, ALVARA_TYPES, AlvaraType } from '@/types/alvara';
+import { Alvara, AlvaraFormData, ALVARA_TYPES, AlvaraType, AlvaraProcessingStatus } from '@/types/alvara';
 import { Cliente } from '@/types/cliente';
+import { AlvaraProcessingStatusSelect } from './AlvaraProcessingStatusSelect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -22,11 +24,12 @@ import {
 } from '@/components/ui/select';
 import { formatCnpj } from '@/lib/alvara-utils';
 import { Link } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
 
 interface AlvaraFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: AlvaraFormData) => void;
+  onSubmit: (data: AlvaraFormData) => Promise<void>;
   editingAlvara?: Alvara | null;
   clientes: Cliente[];
 }
@@ -38,6 +41,8 @@ export function AlvaraForm({
   editingAlvara,
   clientes,
 }: AlvaraFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // Verificar se é um alvará em abertura (sem data de emissão)
   const isAlvaraEmAbertura = editingAlvara && !editingAlvara.issueDate;
 
@@ -47,12 +52,14 @@ export function AlvaraForm({
     requestDate: editingAlvara?.requestDate || new Date(),
     issueDate: editingAlvara?.issueDate,
     expirationDate: editingAlvara?.expirationDate,
+    processingStatus: editingAlvara?.processingStatus,
     notes: editingAlvara?.notes || '',
   }));
 
   // Atualizar formData quando editingAlvara mudar ou quando o dialog abrir/fechar
   useEffect(() => {
     if (open) {
+      setError(null);
       if (editingAlvara) {
         setFormData({
           clienteId: editingAlvara.clienteId,
@@ -60,6 +67,7 @@ export function AlvaraForm({
           requestDate: editingAlvara.requestDate,
           issueDate: editingAlvara.issueDate,
           expirationDate: editingAlvara.expirationDate,
+          processingStatus: editingAlvara.processingStatus,
           notes: editingAlvara.notes || '',
         });
       } else {
@@ -69,16 +77,26 @@ export function AlvaraForm({
           requestDate: new Date(),
           issueDate: undefined,
           expirationDate: undefined,
+          processingStatus: undefined,
           notes: '',
         });
       }
     }
   }, [editingAlvara, open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    // Não resetar aqui - o useEffect vai cuidar disso quando editingAlvara mudar
+    try {
+      setIsLoading(true);
+      setError(null);
+      await onSubmit(formData);
+      onOpenChange(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao salvar alvará';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatDateForInput = (date?: Date) => {
@@ -101,6 +119,12 @@ export function AlvaraForm({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-2">
             <Label htmlFor="clienteId">Cliente *</Label>
             <Select
@@ -214,6 +238,18 @@ export function AlvaraForm({
             </div>
           </div>
 
+          {isAlvaraEmAbertura && (
+            <div className="space-y-2">
+              <Label htmlFor="processingStatus">Status de Processamento</Label>
+              <AlvaraProcessingStatusSelect
+                value={formData.processingStatus}
+                onValueChange={(status) =>
+                  setFormData({ ...formData, processingStatus: status })
+                }
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="notes">Observações</Label>
             <Textarea
@@ -232,11 +268,12 @@ export function AlvaraForm({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isLoading}
             >
               Cancelar
             </Button>
-            <Button type="submit">
-              {editingAlvara ? 'Salvar Alterações' : 'Cadastrar'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Salvando...' : editingAlvara ? 'Salvar Alterações' : 'Cadastrar'}
             </Button>
           </DialogFooter>
         </form>

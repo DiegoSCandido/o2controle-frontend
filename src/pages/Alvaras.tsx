@@ -85,52 +85,60 @@ const AlvarasPage = () => {
     });
   }, [activeTab, novosAlvaras, alvarasEmFuncionamento, searchTerm, statusFilter]);
 
-  const handleAddAlvara = (data: AlvaraFormData) => {
-    if (!data.clienteId) {
-      toast({
-        title: 'Cliente obrigatório',
-        description: 'Selecione um cliente para continuar.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!data.type) {
-      toast({
-        title: 'Tipo obrigatório',
-        description: 'Selecione um tipo de alvará para continuar.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (editingAlvara) {
-      const wasEmAbertura = !editingAlvara.issueDate;
-      const isNowConcluido = !!data.issueDate;
-      
-      updateAlvara(editingAlvara.id, data, getClienteById);
-      
-      if (wasEmAbertura && isNowConcluido) {
-        setActiveTab('funcionamento');
+  const handleAddAlvara = async (data: AlvaraFormData) => {
+    try {
+      if (!data.clienteId) {
         toast({
-          title: 'Alvará concluído!',
-          description: 'O alvará foi movido para a aba de alvarás em funcionamento.',
+          title: 'Cliente obrigatório',
+          description: 'Selecione um cliente para continuar.',
+          variant: 'destructive',
         });
-      } else {
+        return;
+      }
+
+      if (!data.type) {
         toast({
-          title: 'Alvará atualizado',
-          description: 'As alterações foram salvas com sucesso.',
+          title: 'Tipo obrigatório',
+          description: 'Selecione um tipo de alvará para continuar.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (editingAlvara) {
+        const wasEmAbertura = !editingAlvara.issueDate;
+        const isNowConcluido = !!data.issueDate;
+        
+        await updateAlvara(editingAlvara.id, data);
+        
+        if (wasEmAbertura && isNowConcluido) {
+          setActiveTab('funcionamento');
+          toast({
+            title: 'Alvará concluído!',
+            description: 'O alvará foi movido para a aba de alvarás em funcionamento.',
+          });
+        } else {
+          toast({
+            title: 'Alvará atualizado',
+            description: 'As alterações foram salvas com sucesso.',
+          });
+        }
+      } else {
+        await addAlvara(data);
+        toast({
+          title: 'Alvará cadastrado',
+          description: 'O novo alvará foi adicionado ao sistema.',
         });
       }
-    } else {
-      addAlvara(data, getClienteById);
+      setIsFormOpen(false);
+      setEditingAlvara(null);
+    } catch (error) {
       toast({
-        title: 'Alvará cadastrado',
-        description: 'O novo alvará foi adicionado ao sistema.',
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao salvar alvará',
+        variant: 'destructive',
       });
     }
-    setIsFormOpen(false);
-    setEditingAlvara(null);
   };
 
   const handleEdit = (alvara: Alvara) => {
@@ -138,13 +146,21 @@ const AlvarasPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteAlvara(id);
-    toast({
-      title: 'Alvará removido',
-      description: 'O alvará foi excluído do sistema.',
-      variant: 'destructive',
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAlvara(id);
+      toast({
+        title: 'Alvará removido',
+        description: 'O alvará foi excluído do sistema.',
+        variant: 'destructive',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao deletar alvará',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleOpenForm = () => {

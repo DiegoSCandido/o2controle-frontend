@@ -1,4 +1,5 @@
 export type AlvaraStatus = 'pending' | 'valid' | 'expiring' | 'expired';
+export type AlvaraProcessingStatus = 'lançado' | 'aguardando_cliente' | 'aguardando_orgao';
 
 export const ALVARA_TYPES = [
   'Alvará de Funcionamento',
@@ -22,6 +23,7 @@ export interface Alvara {
   issueDate?: Date;
   expirationDate?: Date;
   status: AlvaraStatus;
+  processingStatus?: AlvaraProcessingStatus; // Status de processamento do alvará
   notes?: string;
 }
 
@@ -31,5 +33,6 @@ export interface AlvaraFormData {
   requestDate: Date;
   issueDate?: Date;
   expirationDate?: Date;
+  processingStatus?: AlvaraProcessingStatus;
   notes?: string;
 }

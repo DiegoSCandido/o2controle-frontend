@@ -38,7 +38,7 @@ export function getDaysUntilExpiration(expirationDate?: Date): number | null {
 export function getStatusLabel(status: AlvaraStatus): string {
   const labels: Record<AlvaraStatus, string> = {
     pending: 'Pendente',
-    valid: 'Válido',
+    valid: 'Ativo',
     expiring: 'Vencendo',
     expired: 'Vencido',
   };

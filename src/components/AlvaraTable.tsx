@@ -3,7 +3,7 @@ import { StatusBadge } from './StatusBadge';
 import { getDaysUntilExpiration, formatCnpj } from '@/lib/alvara-utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Trash2, Edit, Eye } from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -79,7 +79,7 @@ export function AlvaraTable({ alvaras, onDelete, onEdit, showIssueDate = false }
                 {getDaysText(alvara)}
               </TableCell>
               <TableCell>
-                <StatusBadge status={alvara.status} />
+                <StatusBadge alvara={alvara} />
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
