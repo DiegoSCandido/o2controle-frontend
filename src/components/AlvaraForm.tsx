@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Alvara, AlvaraFormData, ALVARA_TYPES, AlvaraType, AlvaraProcessingStatus } from '@/types/alvara';
 import { Cliente } from '@/types/cliente';
 import { AlvaraProcessingStatusSelect } from './AlvaraProcessingStatusSelect';
@@ -55,6 +55,12 @@ export function AlvaraForm({
     processingStatus: editingAlvara?.processingStatus,
     notes: editingAlvara?.notes || '',
   }));
+
+  // Filtrar tipos de alvará permitidos pelo cliente selecionado
+  const tiposPermitidos = useMemo(() => {
+    const cliente = clientes.find((c) => c.id === formData.clienteId);
+    return cliente?.alvaras && cliente.alvaras.length > 0 ? cliente.alvaras : [];
+  }, [clientes, formData.clienteId]);
 
   // Atualizar formData quando editingAlvara mudar ou quando o dialog abrir/fechar
   useEffect(() => {
@@ -174,68 +180,39 @@ export function AlvaraForm({
               value={formData.type}
               onValueChange={(value) => setFormData({ ...formData, type: value as AlvaraType })}
               required
+              disabled={!formData.clienteId || tiposPermitidos.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
+                <SelectValue placeholder={formData.clienteId ? (tiposPermitidos.length > 0 ? "Selecione o tipo" : "Nenhum tipo disponível") : "Selecione um cliente"} />
               </SelectTrigger>
               <SelectContent>
-                {ALVARA_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
+                {tiposPermitidos.length > 0 ? (
+                  tiposPermitidos.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-muted-foreground text-sm">Nenhum tipo disponível</div>
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="requestDate">Data Solicitação *</Label>
-              <Input
-                id="requestDate"
-                type="date"
-                value={formatDateForInput(formData.requestDate)}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    requestDate: new Date(e.target.value),
-                  })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="issueDate">Data Emissão</Label>
-              <Input
-                id="issueDate"
-                type="date"
-                value={formatDateForInput(formData.issueDate)}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    issueDate: e.target.value
-                      ? new Date(e.target.value)
-                      : undefined,
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expirationDate">Data Vencimento</Label>
-              <Input
-                id="expirationDate"
-                type="date"
-                value={formatDateForInput(formData.expirationDate)}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    expirationDate: e.target.value
-                      ? new Date(e.target.value)
-                      : undefined,
-                  })
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="requestDate">Data Solicitação *</Label>
+            <Input
+              id="requestDate"
+              type="date"
+              value={formatDateForInput(formData.requestDate)}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  requestDate: new Date(e.target.value),
+                })
+              }
+              required
+            />
           </div>
 
           {isAlvaraEmAbertura && (

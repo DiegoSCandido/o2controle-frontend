@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import o2conLogo from '@/assets/o2contole-logo.png';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const ClientesPage = () => {
   const { clientes, addCliente, updateCliente, deleteCliente } = useClientes();
@@ -17,6 +18,7 @@ const ClientesPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [clienteParaExcluir, setClienteParaExcluir] = useState<Cliente | null>(null);
 
   const filteredClientes = useMemo(() => {
     return clientes.filter((cliente) => {
@@ -25,7 +27,6 @@ const ClientesPage = () => {
         cliente.razaoSocial.toLowerCase().includes(searchLower) ||
         cliente.nomeFantasia.toLowerCase().includes(searchLower) ||
         cliente.cnpj.includes(searchTerm) ||
-        cliente.email.toLowerCase().includes(searchLower) ||
         cliente.municipio.toLowerCase().includes(searchLower)
       );
     });
@@ -62,9 +63,15 @@ const ClientesPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    const cliente = clientes.find((c) => c.id === id);
+    if (cliente) setClienteParaExcluir(cliente);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!clienteParaExcluir) return;
     try {
-      await deleteCliente(id);
+      await deleteCliente(clienteParaExcluir.id);
       toast({
         title: 'Cliente removido',
         description: 'O cliente foi excluído do sistema.',
@@ -76,6 +83,8 @@ const ClientesPage = () => {
         description: error instanceof Error ? error.message : 'Erro ao deletar cliente',
         variant: 'destructive',
       });
+    } finally {
+      setClienteParaExcluir(null);
     }
   };
 
@@ -162,6 +171,21 @@ const ClientesPage = () => {
         onSubmit={handleAddCliente}
         editingCliente={editingCliente}
       />
+      {/* Dialog de Confirmação de Exclusão de Cliente */}
+      <Dialog open={!!clienteParaExcluir} onOpenChange={(open) => { if (!open) setClienteParaExcluir(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Tem certeza que deseja excluir o cliente <b>{clienteParaExcluir?.razaoSocial}</b>?</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClienteParaExcluir(null)}>Não</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>Sim</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

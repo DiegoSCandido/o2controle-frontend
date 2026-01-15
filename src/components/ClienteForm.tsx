@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Cliente, ClienteFormData } from '@/types/cliente';
+import { ALVARA_TYPES } from '@/types/alvara';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,16 +60,11 @@ export function ClienteForm({
     cnpj: editingCliente?.cnpj || '',
     razaoSocial: editingCliente?.razaoSocial || '',
     nomeFantasia: editingCliente?.nomeFantasia || '',
-    email: editingCliente?.email || '',
-    telefone: editingCliente?.telefone || '',
-    emailApuracao: editingCliente?.emailApuracao || '',
     uf: editingCliente?.uf || '',
     municipio: editingCliente?.municipio || '',
-    regimeTributario: editingCliente?.regimeTributario || '',
     atividadePrincipalCodigo: editingCliente?.atividadePrincipalCodigo || '',
     atividadePrincipalDescricao: editingCliente?.atividadePrincipalDescricao || '',
-    inscricaoMunicipal: editingCliente?.inscricaoMunicipal || '',
-    inscricaoEstadual: editingCliente?.inscricaoEstadual || '',
+    alvaras: editingCliente?.alvaras || [],
   }));
 
   // Estados para atividades secundárias
@@ -108,16 +105,11 @@ export function ClienteForm({
           cnpj: editingCliente.cnpj,
           razaoSocial: editingCliente.razaoSocial,
           nomeFantasia: editingCliente.nomeFantasia,
-          email: editingCliente.email,
-          telefone: editingCliente.telefone,
-          emailApuracao: editingCliente.emailApuracao,
           uf: editingCliente.uf,
           municipio: editingCliente.municipio,
-          regimeTributario: editingCliente.regimeTributario,
           atividadePrincipalCodigo: editingCliente.atividadePrincipalCodigo,
           atividadePrincipalDescricao: editingCliente.atividadePrincipalDescricao,
-          inscricaoMunicipal: editingCliente.inscricaoMunicipal || '',
-          inscricaoEstadual: editingCliente.inscricaoEstadual || '',
+          alvaras: editingCliente.alvaras || [],
         });
         loadAtividades(editingCliente.id);
         loadDocumentos(editingCliente.id);
@@ -126,16 +118,11 @@ export function ClienteForm({
           cnpj: '',
           razaoSocial: '',
           nomeFantasia: '',
-          email: '',
-          telefone: '',
-          emailApuracao: '',
           uf: '',
           municipio: '',
-          regimeTributario: '',
           atividadePrincipalCodigo: '',
           atividadePrincipalDescricao: '',
-          inscricaoMunicipal: '',
-          inscricaoEstadual: '',
+          alvaras: [],
         });
         setAtividades([]);
         setDocumentos([]);
@@ -359,55 +346,43 @@ export function ClienteForm({
                 </div>
               </div>
 
-              {/* Nome Fantasia e Email */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-                  <Input
-                    id="nomeFantasia"
-                    value={formData.nomeFantasia}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nomeFantasia: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Padrão</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
+
+              {/* Nome Fantasia */}
+              <div className="space-y-2">
+                <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                <Input
+                  id="nomeFantasia"
+                  value={formData.nomeFantasia}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nomeFantasia: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* Seleção de Alvarás */}
+              <div className="space-y-2">
+                <Label>Tipos de Alvará</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {ALVARA_TYPES.map((tipo) => (
+                    <label key={tipo} className="flex items-center gap-2">
+                      <Checkbox
+                        checked={formData.alvaras.includes(tipo)}
+                        onCheckedChange={(checked) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            alvaras: checked
+                              ? [...prev.alvaras, tipo]
+                              : prev.alvaras.filter((t) => t !== tipo),
+                          }));
+                        }}
+                        id={`alvara-${tipo}`}
+                      />
+                      <span>{tipo}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              {/* Telefone e Email Apuração */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone</Label>
-                  <Input
-                    id="telefone"
-                    value={formData.telefone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, telefone: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="emailApuracao">Email Apuração</Label>
-                  <Input
-                    id="emailApuracao"
-                    type="email"
-                    value={formData.emailApuracao}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emailApuracao: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
 
               {/* UF e Município */}
               <div className="grid grid-cols-2 gap-4">
@@ -443,64 +418,11 @@ export function ClienteForm({
                 </div>
               </div>
 
-              {/* Regime Tributário */}
-              <div className="space-y-2">
-                <Label htmlFor="regimeTributario">Regime Tributário</Label>
-                <Select
-                  value={formData.regimeTributario}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, regimeTributario: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um regime" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {REGIMES_TRIBUTARIOS.map((regime) => (
-                      <SelectItem key={regime} value={regime}>
-                        {regime}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              {/* Atividade Principal agora disponível na aba "Atividades" */}
-              <div className="p-2 text-sm text-gray-500">
-                A seleção da atividade principal foi movida para a aba "Atividades".
-                Vá para a aba para escolher a atividade principal e adicionar atividades
-                secundárias.
-              </div>
 
-              {/* Inscrições */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="inscricaoMunicipal">Inscrição Municipal</Label>
-                  <Input
-                    id="inscricaoMunicipal"
-                    value={formData.inscricaoMunicipal}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        inscricaoMunicipal: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="inscricaoEstadual">Inscrição Estadual</Label>
-                  <Input
-                    id="inscricaoEstadual"
-                    value={formData.inscricaoEstadual}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        inscricaoEstadual: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
+
+
+
 
               {/* Botões */}
               <DialogFooter className="mt-6">

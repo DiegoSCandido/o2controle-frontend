@@ -3,7 +3,7 @@ import { StatusBadge } from './StatusBadge';
 import { getDaysUntilExpiration, formatCnpj } from '@/lib/alvara-utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,10 +18,11 @@ interface AlvaraTableProps {
   alvaras: Alvara[];
   onDelete: (id: string) => void;
   onEdit: (alvara: Alvara) => void;
+  onFinalize?: (alvara: Alvara) => void;
   showIssueDate?: boolean; // Para mostrar data de emissão em alvarás em funcionamento
 }
 
-export function AlvaraTable({ alvaras, onDelete, onEdit, showIssueDate = false }: AlvaraTableProps) {
+export function AlvaraTable({ alvaras, onDelete, onEdit, onFinalize, showIssueDate = false }: AlvaraTableProps) {
   const formatDate = (date?: Date) => {
     if (!date) return '-';
     return format(new Date(date), 'dd/MM/yyyy', { locale: ptBR });
@@ -91,6 +92,17 @@ export function AlvaraTable({ alvaras, onDelete, onEdit, showIssueDate = false }
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
+                  {onFinalize && !alvara.issueDate && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onFinalize(alvara)}
+                      className="h-8 w-8 text-green-600 hover:text-green-700"
+                      title="Finalizar Alvará"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useAlvaras } from '@/hooks/useAlvaras';
 import { useClientes } from '@/hooks/useClientes';
 import { AlvaraTable } from '@/components/AlvaraTable';
@@ -33,6 +34,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import o2conLogo from '@/assets/o2contole-logo.png';
 
+
 const AlvarasPage = () => {
   const { alvaras, stats, addAlvara, updateAlvara, deleteAlvara } = useAlvaras();
   const { clientes, getClienteById } = useClientes();
@@ -41,7 +43,10 @@ const AlvarasPage = () => {
   const [editingAlvara, setEditingAlvara] = useState<Alvara | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<AlvaraStatus | 'all'>('all');
-  const [activeTab, setActiveTab] = useState<'novos' | 'funcionamento'>('novos');
+  const [activeTab, setActiveTab] = useState<'novos' | 'funcionamento'>('funcionamento');
+  const [finalizandoAlvara, setFinalizandoAlvara] = useState<Alvara | null>(null);
+  const [finalizacaoDate, setFinalizacaoDate] = useState('');
+  const [alvaraParaExcluir, setAlvaraParaExcluir] = useState<Alvara | null>(null);
 
   // Separar alvarás em duas categorias
   const { novosAlvaras, alvarasEmFuncionamento } = useMemo(() => {
@@ -146,9 +151,15 @@ const AlvarasPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    const alvara = alvaras.find((a) => a.id === id);
+    if (alvara) setAlvaraParaExcluir(alvara);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!alvaraParaExcluir) return;
     try {
-      await deleteAlvara(id);
+      await deleteAlvara(alvaraParaExcluir.id);
       toast({
         title: 'Alvará removido',
         description: 'O alvará foi excluído do sistema.',
@@ -160,12 +171,46 @@ const AlvarasPage = () => {
         description: error instanceof Error ? error.message : 'Erro ao deletar alvará',
         variant: 'destructive',
       });
+    } finally {
+      setAlvaraParaExcluir(null);
     }
   };
 
   const handleOpenForm = () => {
     setEditingAlvara(null);
     setIsFormOpen(true);
+  };
+
+  const handleFinalize = (alvara: Alvara) => {
+    setFinalizandoAlvara(alvara);
+    setFinalizacaoDate('');
+  };
+
+  const handleConfirmFinalize = async () => {
+    if (!finalizandoAlvara || !finalizacaoDate) return;
+    try {
+      const issueDate = new Date(finalizacaoDate);
+      const expirationDate = new Date(issueDate);
+      expirationDate.setFullYear(issueDate.getFullYear() + 1);
+      await updateAlvara(finalizandoAlvara.id, {
+        ...finalizandoAlvara,
+        issueDate,
+        expirationDate,
+      });
+      setFinalizandoAlvara(null);
+      setFinalizacaoDate('');
+      setActiveTab('funcionamento');
+      toast({
+        title: 'Alvará finalizado',
+        description: 'O alvará foi movido para Em Funcionamento.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao finalizar alvará',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -200,21 +245,21 @@ const AlvarasPage = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'novos' | 'funcionamento')}>
           <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="novos" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Novos Alvarás
-              {statsNovos.total > 0 && (
-                <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
-                  {statsNovos.total}
-                </span>
-              )}
-            </TabsTrigger>
             <TabsTrigger value="funcionamento" className="gap-2">
               <Building2 className="h-4 w-4" />
               Em Funcionamento
               {statsFuncionamento.total > 0 && (
                 <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
                   {statsFuncionamento.total}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="novos" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Novos Alvarás
+              {statsNovos.total > 0 && (
+                <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
+                  {statsNovos.total}
                 </span>
               )}
             </TabsTrigger>
@@ -284,6 +329,7 @@ const AlvarasPage = () => {
               alvaras={filteredAlvaras}
               onDelete={handleDelete}
               onEdit={handleEdit}
+              onFinalize={handleFinalize}
               showIssueDate={false}
             />
           </TabsContent>
@@ -380,6 +426,43 @@ const AlvarasPage = () => {
         editingAlvara={editingAlvara}
         clientes={clientes}
       />
+      {/* Dialog de Finalização */}
+      <Dialog open={!!finalizandoAlvara} onOpenChange={(open) => { if (!open) setFinalizandoAlvara(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalizar Alvará</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Informe a data de emissão para finalizar o alvará:</p>
+            <input
+              type="date"
+              className="border rounded px-3 py-2 w-full"
+              value={finalizacaoDate}
+              onChange={e => setFinalizacaoDate(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFinalizandoAlvara(null)}>Cancelar</Button>
+            <Button onClick={handleConfirmFinalize} disabled={!finalizacaoDate}>Finalizar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Confirmação de Exclusão de Alvará */}
+      <Dialog open={!!alvaraParaExcluir} onOpenChange={(open) => { if (!open) setAlvaraParaExcluir(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Tem certeza que deseja excluir o alvará <b>{alvaraParaExcluir?.type}</b> do cliente <b>{alvaraParaExcluir?.clientName}</b>?</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAlvaraParaExcluir(null)}>Não</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>Sim</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
