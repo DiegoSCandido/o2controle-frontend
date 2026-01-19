@@ -15,8 +15,20 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitializing } = useAuth();
   const isLoginPage = location.pathname === "/";
+
+  // Enquanto está inicializando, não redireciona
+  if (isInitializing) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Redireciona para login se não autenticado em páginas protegidas
   if (!isAuthenticated && !isLoginPage) {

@@ -9,6 +9,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isInitializing: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Restaura usuário do localStorage ao carregar
   useEffect(() => {
@@ -32,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('authToken');
       }
     }
+    setIsInitializing(false);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -92,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider
       value={{
+        isInitializing,
         user,
         isLoading,
         login,
