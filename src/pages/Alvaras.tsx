@@ -216,49 +216,52 @@ const AlvarasPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <header className="bg-card border-b sticky top-0 lg:top-0 z-10 lg:mt-0 mt-16">
+        <div className="container px-4 py-3 sm:py-4 lg:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
               <img 
                 src={o2conLogo}
                 alt="O2con Soluções Contábeis" 
-                className="h-10 object-contain"
+                className="h-8 sm:h-10 object-contain"
               />
-              <div className="h-8 w-px bg-border" />
+              <div className="hidden sm:block h-8 w-px bg-border" />
               <div>
-                <h1 className="text-lg font-bold text-foreground">Gestão de Alvarás</h1>
+                <h1 className="text-base sm:text-lg font-bold text-foreground">Gestão de Alvarás</h1>
                 <p className="text-xs text-muted-foreground">
                   Controle de documentos e vencimentos
                 </p>
               </div>
             </div>
-            <Button onClick={handleOpenForm} className="gap-2">
+            <Button onClick={handleOpenForm} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
-              Novo Alvará
+              <span className="hidden sm:inline">Novo Alvará</span>
+              <span className="sm:hidden">Novo</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container py-6 space-y-6 pl-72">
+      <main className="container px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 w-full">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'novos' | 'funcionamento')}>
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="funcionamento" className="gap-2">
-              <Building2 className="h-4 w-4" />
-              Em Funcionamento
+          <TabsList className="grid w-full max-w-md grid-cols-2 text-xs sm:text-base">
+            <TabsTrigger value="funcionamento" className="gap-1 sm:gap-2">
+              <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Em Funcionamento</span>
+              <span className="sm:hidden">Func.</span>
               {statsFuncionamento.total > 0 && (
                 <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
                   {statsFuncionamento.total}
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="novos" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Novos Alvarás
+            <TabsTrigger value="novos" className="gap-1 sm:gap-2">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Novos Alvarás</span>
+              <span className="sm:hidden">Novos</span>
               {statsNovos.total > 0 && (
-                <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
+                <span className="ml-0.5 sm:ml-1 rounded-full bg-primary/10 px-1.5 sm:px-2 py-0.5 text-xs">
                   {statsNovos.total}
                 </span>
               )}
@@ -266,9 +269,9 @@ const AlvarasPage = () => {
           </TabsList>
 
           {/* Tab: Novos Alvarás */}
-          <TabsContent value="novos" className="space-y-6 mt-6">
+          <TabsContent value="novos" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* Stats Grid para Novos Alvarás */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4">
               <StatCard
                 title="Total em Abertura"
                 value={statsNovos.total}
@@ -284,21 +287,21 @@ const AlvarasPage = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-col gap-2 sm:gap-4">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por cliente, CNPJ ou tipo..."
+                  placeholder="Buscar alvará..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
               <Select
                 value={statusFilter}
                 onValueChange={(value) => setStatusFilter(value as AlvaraStatus | 'all')}
               >
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                   <SelectValue placeholder="Filtrar por status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -309,7 +312,7 @@ const AlvarasPage = () => {
             </div>
 
             {/* Results info */}
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
               <p>
                 {filteredAlvaras.length} de {novosAlvaras.length} alvarás em abertura
               </p>
@@ -335,9 +338,9 @@ const AlvarasPage = () => {
           </TabsContent>
 
           {/* Tab: Alvarás em Funcionamento */}
-          <TabsContent value="funcionamento" className="space-y-6 mt-6">
+          <TabsContent value="funcionamento" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* Stats Grid para Alvarás em Funcionamento */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
               <StatCard
                 title="Total"
                 value={statsFuncionamento.total}
@@ -365,21 +368,21 @@ const AlvarasPage = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-col gap-2 sm:gap-4">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por cliente, CNPJ ou tipo..."
+                  placeholder="Buscar alvará..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
               <Select
                 value={statusFilter}
                 onValueChange={(value) => setStatusFilter(value as AlvaraStatus | 'all')}
               >
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                   <SelectValue placeholder="Filtrar por status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -392,7 +395,7 @@ const AlvarasPage = () => {
             </div>
 
             {/* Results info */}
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
               <p>
                 {filteredAlvaras.length} de {alvarasEmFuncionamento.length} alvarás em funcionamento
               </p>

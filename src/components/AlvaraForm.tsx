@@ -113,7 +113,7 @@ export function AlvaraForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
             {editingAlvara ? 'Editar Alvará' : 'Novo Alvará'}
@@ -139,12 +139,12 @@ export function AlvaraForm({
               required
               disabled={isAlvaraEmAbertura}
             >
-              <SelectTrigger className={isAlvaraEmAbertura ? 'bg-muted cursor-not-allowed' : ''}>
+              <SelectTrigger className={`text-sm ${isAlvaraEmAbertura ? 'bg-muted cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder="Selecione o cliente" />
               </SelectTrigger>
               <SelectContent>
                 {clientes.length === 0 ? (
-                  <div className="p-4 text-sm text-muted-foreground text-center">
+                  <div className="p-4 text-xs sm:text-sm text-muted-foreground text-center">
                     <p>Nenhum cliente cadastrado</p>
                     <Link to="/clientes" className="text-primary underline mt-2 block">
                       Cadastrar cliente
@@ -175,14 +175,14 @@ export function AlvaraForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="type">Tipo de Alvará *</Label>
+            <Label htmlFor="type" className="text-xs sm:text-sm">Tipo de Alvará *</Label>
             <Select
               value={formData.type}
               onValueChange={(value) => setFormData({ ...formData, type: value as AlvaraType })}
               required
               disabled={!formData.clienteId || tiposPermitidos.length === 0}
             >
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder={formData.clienteId ? (tiposPermitidos.length > 0 ? "Selecione o tipo" : "Nenhum tipo disponível") : "Selecione um cliente"} />
               </SelectTrigger>
               <SelectContent>
@@ -193,14 +193,14 @@ export function AlvaraForm({
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="p-2 text-muted-foreground text-sm">Nenhum tipo disponível</div>
+                  <div className="p-2 text-muted-foreground text-xs sm:text-sm">Nenhum tipo disponível</div>
                 )}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="requestDate">Data Solicitação *</Label>
+            <Label htmlFor="requestDate" className="text-xs sm:text-sm">Data Solicitação *</Label>
             <Input
               id="requestDate"
               type="date"
@@ -211,13 +211,14 @@ export function AlvaraForm({
                   requestDate: new Date(e.target.value),
                 })
               }
+              className="text-sm"
               required
             />
           </div>
 
           {isAlvaraEmAbertura && (
             <div className="space-y-2">
-              <Label htmlFor="processingStatus">Status de Processamento</Label>
+              <Label htmlFor="processingStatus" className="text-xs sm:text-sm">Status de Processamento</Label>
               <AlvaraProcessingStatusSelect
                 value={formData.processingStatus}
                 onValueChange={(status) =>
@@ -228,7 +229,7 @@ export function AlvaraForm({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Observações</Label>
+            <Label htmlFor="notes" className="text-xs sm:text-sm">Observações</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -236,6 +237,7 @@ export function AlvaraForm({
                 setFormData({ ...formData, notes: e.target.value })
               }
               placeholder="Informações adicionais..."
+              className="text-sm"
               rows={3}
             />
           </div>

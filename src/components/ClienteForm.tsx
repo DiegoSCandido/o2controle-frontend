@@ -286,7 +286,7 @@ export function ClienteForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[900px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
             {editingCliente ? 'Editar Cliente' : 'Novo Cliente'}
@@ -306,13 +306,13 @@ export function ClienteForm({
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="dados">Dados Básicos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-4 text-xs sm:text-sm">
+            <TabsTrigger value="dados">Dados</TabsTrigger>
             <TabsTrigger value="atividades">
-              Atividades
+              Ativid.
             </TabsTrigger>
             <TabsTrigger value="documentos" disabled={!editingCliente}>
-              Documentos
+              Docs
             </TabsTrigger>
           </TabsList>
 
@@ -320,9 +320,9 @@ export function ClienteForm({
           <TabsContent value="dados">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* CNPJ e Razão Social */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Label htmlFor="cnpj" className="text-xs sm:text-sm">CNPJ</Label>
                   <Input
                     id="cnpj"
                     value={formData.cnpj}
@@ -330,17 +330,19 @@ export function ClienteForm({
                       setFormData({ ...formData, cnpj: e.target.value })
                     }
                     placeholder="00.000.000/0000-00"
+                    className="text-sm"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="razaoSocial">Razão Social</Label>
+                  <Label htmlFor="razaoSocial" className="text-xs sm:text-sm">Razão Social</Label>
                   <Input
                     id="razaoSocial"
                     value={formData.razaoSocial}
                     onChange={(e) =>
                       setFormData({ ...formData, razaoSocial: e.target.value })
                     }
+                    className="text-sm"
                     required
                   />
                 </div>
@@ -349,22 +351,23 @@ export function ClienteForm({
 
               {/* Nome Fantasia */}
               <div className="space-y-2">
-                <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                <Label htmlFor="nomeFantasia" className="text-xs sm:text-sm">Nome Fantasia</Label>
                 <Input
                   id="nomeFantasia"
                   value={formData.nomeFantasia}
                   onChange={(e) =>
                     setFormData({ ...formData, nomeFantasia: e.target.value })
                   }
+                  className="text-sm"
                 />
               </div>
 
               {/* Seleção de Alvarás */}
               <div className="space-y-2">
-                <Label>Tipos de Alvará</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <Label className="text-xs sm:text-sm">Tipos de Alvará</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {ALVARA_TYPES.map((tipo) => (
-                    <label key={tipo} className="flex items-center gap-2">
+                    <label key={tipo} className="flex items-center gap-2 cursor-pointer text-sm">
                       <Checkbox
                         checked={formData.alvaras.includes(tipo)}
                         onCheckedChange={(checked) => {
@@ -385,16 +388,16 @@ export function ClienteForm({
 
 
               {/* UF e Município */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="uf">UF</Label>
+                  <Label htmlFor="uf" className="text-xs sm:text-sm">UF</Label>
                   <Select
                     value={formData.uf}
                     onValueChange={(value) =>
                       setFormData({ ...formData, uf: value })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm">
                       <SelectValue placeholder="Selecione um estado" />
                     </SelectTrigger>
                     <SelectContent>
@@ -407,13 +410,14 @@ export function ClienteForm({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="municipio">Município</Label>
+                  <Label htmlFor="municipio" className="text-xs sm:text-sm">Município</Label>
                   <Input
                     id="municipio"
                     value={formData.municipio}
                     onChange={(e) =>
                       setFormData({ ...formData, municipio: e.target.value })
                     }
+                    className="text-sm"
                   />
                 </div>
               </div>

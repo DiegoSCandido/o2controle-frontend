@@ -96,60 +96,59 @@ const ClientesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <header className="bg-card border-b sticky top-0 lg:top-0 z-10 lg:mt-0 mt-16">
+        <div className="container px-4 py-3 sm:py-4 lg:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
               <img
                 src={o2conLogo}
                 alt="O2con Soluções Contábeis"
-                className="h-10 object-contain"
+                className="h-8 sm:h-10 object-contain"
               />
-              <div className="h-8 w-px bg-border" />
+              <div className="hidden sm:block h-8 w-px bg-border" />
               <div>
-                <h1 className="text-lg font-bold text-foreground">Cadastro de Clientes</h1>
+                <h1 className="text-base sm:text-lg font-bold text-foreground">Cadastro de Clientes</h1>
                 <p className="text-xs text-muted-foreground">
                   Gerencie os clientes cadastrados
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button onClick={handleOpenForm} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Cliente
-              </Button>
-            </div>
+            <Button onClick={handleOpenForm} className="gap-2 w-full sm:w-auto">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Novo Cliente</span>
+              <span className="sm:hidden">Novo</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container py-6 space-y-6 pl-72">
+      <main className="container px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 w-full">
         {/* Stats */}
-        <div className="flex items-center gap-4">
-          <div className="bg-card rounded-lg border p-4 flex items-center gap-3">
-            <Users className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Total de Clientes</p>
-              <p className="text-2xl font-bold">{clientes.length}</p>
+        <div className="flex overflow-x-auto gap-3 sm:gap-4 pb-2">
+          <div className="bg-card rounded-lg border p-3 sm:p-4 flex items-center gap-3 flex-shrink-0 min-w-[200px] sm:min-w-0 sm:flex-1">
+            <Users className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground">Total de Clientes</p>
+              <p className="text-xl sm:text-2xl font-bold">{clientes.length}</p>
             </div>
           </div>
         </div>
 
         {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por razão social, nome fantasia, CNPJ, e-mail ou município..."
+              placeholder="Buscar cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm sm:text-base"
             />
           </div>
         </div>
 
         {/* Results info */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
           <p>
             {filteredClientes.length} de {clientes.length} clientes
           </p>

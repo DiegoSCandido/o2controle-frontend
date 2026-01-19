@@ -17,8 +17,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex min-h-screen">
-          <div className="flex-1">
+        <div className="flex flex-col lg:flex-row min-h-screen">
+          {/* Sidebar - mobile: top, desktop: left */}
+          <Sidebar />
+          {/* Main content */}
+          <div className="flex-1 w-full">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/clientes" element={<ClientesPage />} />
@@ -27,7 +30,6 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
-          <Sidebar />
         </div>
       </BrowserRouter>
     </TooltipProvider>

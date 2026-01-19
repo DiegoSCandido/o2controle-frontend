@@ -63,8 +63,8 @@ function AlvaraCell({ alvara }: { alvara?: Alvara }) {
 export function ClienteTable({ clientes, alvaras, onDelete, onEdit }: ClienteTableProps) {
   if (clientes.length === 0) {
     return (
-      <div className="bg-card rounded-lg border p-12 text-center">
-        <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
+      <div className="bg-card rounded-lg border p-8 sm:p-12 text-center">
+        <p className="text-muted-foreground text-sm sm:text-base">Nenhum cliente cadastrado</p>
       </div>
     );
   }
@@ -75,15 +75,15 @@ export function ClienteTable({ clientes, alvaras, onDelete, onEdit }: ClienteTab
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="font-semibold">CNPJ</TableHead>
-              <TableHead className="font-semibold">Razão Social</TableHead>
-              <TableHead className="font-semibold">Nome Fantasia</TableHead>
-              <TableHead className="font-semibold">UF</TableHead>
-              <TableHead className="font-semibold">Município</TableHead>
-              <TableHead className="font-semibold">Alvará Funcionamento</TableHead>
-              <TableHead className="font-semibold">Alvará Sanitário</TableHead>
-              <TableHead className="font-semibold">Alvará Bombeiros</TableHead>
-              <TableHead className="font-semibold text-right">Ações</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm">CNPJ</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm">Razão Social</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden md:table-cell">Nome Fantasia</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden lg:table-cell">UF</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden lg:table-cell">Município</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden xl:table-cell">Alvará Func.</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden xl:table-cell">Alvará San.</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden 2xl:table-cell">Alvará Bomb.</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,42 +107,48 @@ export function ClienteTable({ clientes, alvaras, onDelete, onEdit }: ClienteTab
               return (
                 <TableRow
                   key={cliente.id}
-                  className="animate-fade-in"
+                  className="animate-fade-in text-xs sm:text-sm"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="font-mono text-muted-foreground whitespace-nowrap">
                     {formatCnpj(cliente.cnpj)}
                   </TableCell>
-                  <TableCell className="font-medium">{cliente.razaoSocial}</TableCell>
-                  <TableCell>{cliente.nomeFantasia}</TableCell>
-                  <TableCell>{cliente.uf}</TableCell>
-                  <TableCell>{cliente.municipio}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium max-w-[150px] truncate">
+                    {cliente.razaoSocial}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell max-w-[150px] truncate">
+                    {cliente.nomeFantasia}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">{cliente.uf}</TableCell>
+                  <TableCell className="hidden lg:table-cell max-w-[100px] truncate">
+                    {cliente.municipio}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     <AlvaraCell alvara={alvaraFuncionamento} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     <AlvaraCell alvara={alvaraSanitario} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden 2xl:table-cell">
                     <AlvaraCell alvara={alvaraBombeiros} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onEdit(cliente)}
-                        className="h-8 w-8"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onDelete(cliente.id)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </TableCell>

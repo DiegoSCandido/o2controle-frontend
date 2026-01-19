@@ -39,84 +39,98 @@ export function AlvaraTable({ alvaras, onDelete, onEdit, onFinalize, showIssueDa
 
   if (alvaras.length === 0) {
     return (
-      <div className="bg-card rounded-lg border p-12 text-center">
-        <p className="text-muted-foreground">Nenhum alvará cadastrado</p>
+      <div className="bg-card rounded-lg border p-8 sm:p-12 text-center">
+        <p className="text-muted-foreground text-sm sm:text-base">Nenhum alvará cadastrado</p>
       </div>
     );
   }
 
   return (
     <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead className="font-semibold">Cliente</TableHead>
-            <TableHead className="font-semibold">CNPJ</TableHead>
-            <TableHead className="font-semibold">Tipo</TableHead>
-            <TableHead className="font-semibold">Solicitação</TableHead>
-            {showIssueDate && <TableHead className="font-semibold">Emissão</TableHead>}
-            <TableHead className="font-semibold">Vencimento</TableHead>
-            <TableHead className="font-semibold">Prazo</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="font-semibold text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {alvaras.map((alvara, index) => (
-            <TableRow
-              key={alvara.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <TableCell className="font-medium">{alvara.clientName}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {formatCnpj(alvara.clientCnpj)}
-              </TableCell>
-              <TableCell>{alvara.type}</TableCell>
-              <TableCell>{formatDate(alvara.requestDate)}</TableCell>
-              {showIssueDate && <TableCell>{formatDate(alvara.issueDate)}</TableCell>}
-              <TableCell>{formatDate(alvara.expirationDate)}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {getDaysText(alvara)}
-              </TableCell>
-              <TableCell>
-                <StatusBadge alvara={alvara} />
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(alvara)}
-                    className="h-8 w-8"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  {onFinalize && !alvara.issueDate && (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-semibold text-xs sm:text-sm">Cliente</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm">CNPJ</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden md:table-cell">Tipo</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm hidden lg:table-cell">Solicitação</TableHead>
+              {showIssueDate && <TableHead className="font-semibold text-xs sm:text-sm hidden xl:table-cell">Emissão</TableHead>}
+              <TableHead className="font-semibold text-xs sm:text-sm hidden md:table-cell">Vencimento</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm">Prazo</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm">Status</TableHead>
+              <TableHead className="font-semibold text-xs sm:text-sm text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {alvaras.map((alvara, index) => (
+              <TableRow
+                key={alvara.id}
+                className="animate-fade-in text-xs sm:text-sm"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <TableCell className="font-medium max-w-[120px] truncate">
+                  {alvara.clientName}
+                </TableCell>
+                <TableCell className="font-mono text-muted-foreground whitespace-nowrap">
+                  {formatCnpj(alvara.clientCnpj)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell max-w-[100px] truncate">
+                  {alvara.type}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell whitespace-nowrap">
+                  {formatDate(alvara.requestDate)}
+                </TableCell>
+                {showIssueDate && (
+                  <TableCell className="hidden xl:table-cell whitespace-nowrap">
+                    {formatDate(alvara.issueDate)}
+                  </TableCell>
+                )}
+                <TableCell className="hidden md:table-cell whitespace-nowrap">
+                  {formatDate(alvara.expirationDate)}
+                </TableCell>
+                <TableCell className="text-muted-foreground whitespace-nowrap">
+                  {getDaysText(alvara)}
+                </TableCell>
+                <TableCell>
+                  <StatusBadge alvara={alvara} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onFinalize(alvara)}
-                      className="h-8 w-8 text-green-600 hover:text-green-700"
-                      title="Finalizar Alvará"
+                      onClick={() => onEdit(alvara)}
+                      className="h-7 w-7 sm:h-8 sm:w-8"
                     >
-                      <CheckCircle className="h-4 w-4" />
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(alvara.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                    {onFinalize && !alvara.issueDate && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onFinalize(alvara)}
+                        className="h-7 w-7 sm:h-8 sm:w-8 text-green-600 hover:text-green-700"
+                        title="Finalizar Alvará"
+                      >
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(alvara.id)}
+                      className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
