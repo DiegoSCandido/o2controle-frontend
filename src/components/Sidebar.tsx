@@ -98,7 +98,7 @@ const Sidebar = () => {
         <div className="border-t border-slate-200 p-6 space-y-4">
           {user && (
             <div className="text-xs text-slate-500 px-1">
-              <p className="font-medium text-slate-700 truncate">{user.email}</p>
+              <p className="font-medium text-slate-700 truncate">{user.fullName || user.email}</p>
             </div>
           )}
           <button

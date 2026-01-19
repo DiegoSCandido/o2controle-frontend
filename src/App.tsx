@@ -17,6 +17,7 @@ const AppContent = () => {
   const location = useLocation();
   const { isAuthenticated, isInitializing } = useAuth();
   const isLoginPage = location.pathname === "/";
+  const isPublicPage = isLoginPage;
 
   // Enquanto está inicializando, não redireciona
   if (isInitializing) {
@@ -31,14 +32,14 @@ const AppContent = () => {
   }
 
   // Redireciona para login se não autenticado em páginas protegidas
-  if (!isAuthenticated && !isLoginPage) {
+  if (!isAuthenticated && !isPublicPage) {
     return <Navigate to="/" replace />;
   }
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar - mobile: top, desktop: left - hidden on login page */}
-      {!isLoginPage && <Sidebar />}
+      {!isPublicPage && <Sidebar />}
       {/* Main content */}
       <div className="flex-1 w-full">
         <Routes>

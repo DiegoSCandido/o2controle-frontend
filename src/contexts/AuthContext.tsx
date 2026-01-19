@@ -4,12 +4,14 @@ import { validatePassword } from '@/lib/password-validator';
 interface User {
   id: number;
   email: string;
+  fullName?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isInitializing: boolean;
+  authToken: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -19,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -29,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser && storedToken) {
       try {
         setUser(JSON.parse(storedUser));
+        setAuthToken(storedToken);
       } catch {
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
@@ -76,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       setUser(data.user);
+      setAuthToken(data.token);
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       // Armazena o horário de login para logout automático após 1 hora
@@ -87,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    setAuthToken(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     localStorage.removeItem('loginTime');
@@ -97,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         isInitializing,
         user,
+        authToken,
         isLoading,
         login,
         logout,
