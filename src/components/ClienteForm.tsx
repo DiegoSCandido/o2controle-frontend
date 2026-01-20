@@ -552,99 +552,96 @@ export function ClienteForm({
 
           {/* Aba Atividades Secundárias */}
           <TabsContent value="atividades" className="space-y-4">
-            {/* Alerta com atividades encontradas da API */}
-            {atividadesSecundariasAPI.length > 0 && !editingCliente && (
-              <Alert className="border-blue-200 bg-blue-50">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
-                  <p className="font-semibold mb-2">🔍 Atividades Encontradas (via CNPJ)</p>
-                  <ul className="space-y-1 ml-2">
-                    {atividadesSecundariasAPI.map((atividade, idx) => (
-                      <li key={idx} className="text-sm">
-                        <span className="font-medium">{atividade.code}</span> - {atividade.text}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-xs mt-2 italic">Estas atividades serão salvas automaticamente ao criar o cliente</p>
-                </AlertDescription>
-              </Alert>
-            )}
-
+            {/* Atividade Principal */}
             <div className="space-y-4">
-              {/* Seleção da Atividade Principal (CNAE) */}
-              <div className="space-y-4">
-                <CnaeSelect
-                  label="Atividade Principal (CNAE)"
-                  codigoValue={formData.atividadePrincipalCodigo}
-                  descricaoValue={formData.atividadePrincipalDescricao}
-                  onSelect={handleSelecionarCnae}
-                />
+              <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+                <h3 className="font-semibold text-blue-900 mb-3">📌 Atividade Principal (CNAE)</h3>
+                {formData.atividadePrincipalCodigo ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-4">
+                      <div className="min-w-[120px]">
+                        <p className="text-sm text-gray-600">Código</p>
+                        <p className="font-semibold text-blue-900">{formData.atividadePrincipalCodigo}</p>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-600">Descrição</p>
+                        <p className="font-semibold text-blue-900">{formData.atividadePrincipalDescricao}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 italic">Nenhuma atividade principal selecionada</p>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="novaCodigo">Código</Label>
-                  <Input
-                    id="novaCodigo"
-                    value={novaAtividadeCodigo}
-                    readOnly
-                    className="bg-gray-50"
-                    placeholder="Selecionar via dropdown"
-                  />
-                </div>
-                <div className="space-y-0">
-                  <AtividadeSecundariaSelect
-                    label="Descrição da Atividade"
-                    codigoValue={novaAtividadeCodigo}
-                    descricaoValue={novaAtividadeDescricao}
-                    onSelect={handleSelecionarAtividade}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleAddAtividade}
-                disabled={atividadesLoading || !editingCliente}
-                className="w-full"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Adicionar Atividade
-              </Button>
-              {!editingCliente && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Salve o cliente primeiro para poder adicionar atividades
-                  secundárias. Você já pode selecionar a atividade principal acima.
-                </p>
-              )}
             </div>
 
-            {/* Lista de Atividades */}
-            <div className="space-y-2">
-              <h3 className="font-semibold">Atividades Secundárias</h3>
-              {atividadesLoading ? (
-                <p className="text-sm text-gray-500">Carregando...</p>
-              ) : atividades.length > 0 ? (
-                <ul className="space-y-2">
-                  {atividades.map((atividade) => (
-                    <li
-                      key={atividade.id}
-                      className="flex items-center justify-between p-3 border rounded"
-                    >
-                      <div>
-                        <p className="font-medium">{atividade.codigo}</p>
-                        <p className="text-sm text-gray-600">{atividade.descricao}</p>
+            {/* Atividades Secundárias */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-green-500 bg-green-50 p-4 rounded">
+                <h3 className="font-semibold text-green-900 mb-3">
+                  📋 Atividades Secundárias 
+                  {atividadesSecundariasAPI.length > 0 && ` (${atividadesSecundariasAPI.length} encontradas)`}
+                  {editingCliente && atividades.length > 0 && ` (${atividades.length} cadastradas)`}
+                </h3>
+
+                {/* Se está criando novo cliente - mostra as encontradas */}
+                {!editingCliente && atividadesSecundariasAPI.length > 0 && (
+                  <div className="space-y-2">
+                    {atividadesSecundariasAPI.map((atividade, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-2 bg-white rounded border border-green-200">
+                        <div className="text-lg">✓</div>
+                        <div className="flex-1">
+                          <p className="font-medium text-green-900">{atividade.code}</p>
+                          <p className="text-sm text-gray-700">{atividade.text}</p>
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteAtividade(atividade.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">Nenhuma atividade cadastrada</p>
-              )}
+                    ))}
+                    <p className="text-xs text-green-700 mt-3 italic">
+                      💾 Estas atividades serão salvas automaticamente quando você criar o cliente
+                    </p>
+                  </div>
+                )}
+
+                {/* Se está editando - mostra as já cadastradas */}
+                {editingCliente && (
+                  <>
+                    {atividadesLoading ? (
+                      <p className="text-sm text-gray-500">Carregando atividades...</p>
+                    ) : atividades.length > 0 ? (
+                      <div className="space-y-2">
+                        {atividades.map((atividade) => (
+                          <div
+                            key={atividade.id}
+                            className="flex items-start justify-between p-2 bg-white rounded border border-green-200"
+                          >
+                            <div className="flex-1">
+                              <p className="font-medium text-green-900">{atividade.codigo}</p>
+                              <p className="text-sm text-gray-700">{atividade.descricao}</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteAtividade(atividade.id)}
+                              className="ml-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 italic">Nenhuma atividade secundária cadastrada</p>
+                    )}
+                  </>
+                )}
+
+                {/* Se é novo cliente sem atividades - mostra mensagem */}
+                {!editingCliente && atividadesSecundariasAPI.length === 0 && (
+                  <p className="text-sm text-gray-600 italic">
+                    Nenhuma atividade secundária foi encontrada para este CNPJ
+                  </p>
+                )}
+              </div>
             </div>
           </TabsContent>
 
