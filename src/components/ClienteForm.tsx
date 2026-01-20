@@ -194,15 +194,11 @@ export function ClienteForm({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao buscar CNPJ';
       setError(message);
+      console.error('Erro ao buscar CNPJ:', err);
     } finally {
       setSearchingCNPJ(false);
     }
   };
-
-  // Função para limpar o CNPJ (remover pontos, barras e hífens)
-  function limparCNPJ(cnpj: string) {
-    return cnpj.replace(/\D/g, '');
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

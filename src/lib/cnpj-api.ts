@@ -1,4 +1,4 @@
-// Hook para buscar dados de CNPJ via ReceitaWS API
+// Hook para buscar dados de CNPJ via proxy do backend (que chama ReceitaWS)
 
 interface CNPJData {
   status: string;
@@ -48,8 +48,9 @@ export async function fetchCNPJData(cnpj: string): Promise<CNPJData | null> {
       throw new Error('CNPJ deve ter 14 dígitos');
     }
 
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
     const response = await fetch(
-      `https://receitaws.com.br/v1/cnpj/${cnpjLimpo}`
+      `${apiUrl}/cnpj/${cnpjLimpo}`
     );
 
     if (response.status === 429) {
@@ -61,7 +62,8 @@ export async function fetchCNPJData(cnpj: string): Promise<CNPJData | null> {
     }
 
     if (!response.ok) {
-      throw new Error('Erro ao buscar CNPJ');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Erro ao buscar CNPJ');
     }
 
     const data: CNPJData = await response.json();
