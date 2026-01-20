@@ -22,9 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle, Trash2, Plus, Download } from 'lucide-react';
+import { AlertCircle, Trash2, Plus, Download, Search, Loader } from 'lucide-react';
 import { CnaeSelect } from '@/components/CnaeSelect';
 import { AtividadeSecundariaSelect } from '@/components/AtividadeSecundariaSelect';
+import { fetchCNPJData, convertCNPJDataToFormData } from '@/lib/cnpj-api';
 
 const UFS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -56,6 +57,7 @@ export function ClienteForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dados');
+  const [searchingCNPJ, setSearchingCNPJ] = useState(false);
   const [formData, setFormData] = useState<ClienteFormData>(() => ({
     cnpj: editingCliente?.cnpj || '',
     razaoSocial: editingCliente?.razaoSocial || '',
@@ -157,6 +159,43 @@ export function ClienteForm({
       console.error('Erro ao carregar documentos:', err);
     } finally {
       setDocumentosLoading(false);
+    }
+  };
+
+  // Função para limpar o CNPJ (remover pontos, barras e hífens)
+  function limparCNPJ(cnpj: string) {
+    return cnpj.replace(/\D/g, '');
+  }
+
+  // Função para buscar dados do CNPJ na API ReceitaWS
+  const handleBuscarCNPJ = async () => {
+    const cnpjLimpo = limparCNPJ(formData.cnpj);
+    
+    if (cnpjLimpo.length !== 14) {
+      setError('CNPJ deve ter 14 dígitos');
+      return;
+    }
+
+    setSearchingCNPJ(true);
+    setError(null);
+
+    try {
+      const cnpjData = await fetchCNPJData(cnpjLimpo);
+      if (cnpjData) {
+        const novosDados = convertCNPJDataToFormData(cnpjData);
+        setFormData({
+          ...formData,
+          ...novosDados,
+        });
+        // Formatando CNPJ para exibição
+        const cnpjFormatado = `${cnpjLimpo.substring(0, 2)}.${cnpjLimpo.substring(2, 5)}.${cnpjLimpo.substring(5, 8)}/${cnpjLimpo.substring(8, 12)}-${cnpjLimpo.substring(12)}`;
+        setFormData(prev => ({ ...prev, cnpj: cnpjFormatado }));
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao buscar CNPJ';
+      setError(message);
+    } finally {
+      setSearchingCNPJ(false);
     }
   };
 
@@ -319,33 +358,46 @@ export function ClienteForm({
           {/* Aba Dados Básicos */}
           <TabsContent value="dados">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* CNPJ e Razão Social */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cnpj" className="text-xs sm:text-sm">CNPJ</Label>
-                  <Input
-                    id="cnpj"
-                    value={formData.cnpj}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cnpj: e.target.value })
+              {/* CNPJ */}
+              <div className="space-y-2">
+                <Label htmlFor="cnpj" className="text-xs sm:text-sm">CNPJ</Label>
+                <Input
+                  id="cnpj"
+                  value={formData.cnpj}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cnpj: e.target.value })
+                  }
+                  onBlur={() => {
+                    const cnpjLimpo = limparCNPJ(formData.cnpj);
+                    if (cnpjLimpo.length === 14) {
+                      handleBuscarCNPJ();
                     }
-                    placeholder="00.000.000/0000-00"
-                    className="text-sm"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="razaoSocial" className="text-xs sm:text-sm">Razão Social</Label>
-                  <Input
-                    id="razaoSocial"
-                    value={formData.razaoSocial}
-                    onChange={(e) =>
-                      setFormData({ ...formData, razaoSocial: e.target.value })
-                    }
-                    className="text-sm"
-                    required
-                  />
-                </div>
+                  }}
+                  placeholder="00.000.000/0000-00"
+                  className="text-sm"
+                  required
+                  disabled={searchingCNPJ}
+                />
+                {searchingCNPJ && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Loader className="h-3 w-3 animate-spin" />
+                    Buscando informações do CNPJ...
+                  </p>
+                )}
+              </div>
+
+              {/* Razão Social */}
+              <div className="space-y-2">
+                <Label htmlFor="razaoSocial" className="text-xs sm:text-sm">Razão Social</Label>
+                <Input
+                  id="razaoSocial"
+                  value={formData.razaoSocial}
+                  onChange={(e) =>
+                    setFormData({ ...formData, razaoSocial: e.target.value })
+                  }
+                  className="text-sm"
+                  required
+                />
               </div>
 
 
