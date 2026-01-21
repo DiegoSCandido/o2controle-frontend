@@ -41,6 +41,7 @@ const AlvarasPage = () => {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAlvara, setEditingAlvara] = useState<Alvara | null>(null);
+  const [isRenewing, setIsRenewing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<AlvaraStatus | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'novos' | 'funcionamento'>('funcionamento');
@@ -178,6 +179,7 @@ const AlvarasPage = () => {
 
   const handleOpenForm = () => {
     setEditingAlvara(null);
+    setIsRenewing(false);
     setIsFormOpen(true);
   };
 
@@ -189,6 +191,7 @@ const AlvarasPage = () => {
   const handleRenew = (alvara: Alvara) => {
     // Abre o formulário de edição para renovar
     setEditingAlvara(alvara);
+    setIsRenewing(true);
     setIsFormOpen(true);
   };
 
@@ -428,10 +431,17 @@ const AlvarasPage = () => {
       {/* Form Dialog */}
       <AlvaraForm
         open={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        onOpenChange={(open) => {
+          setIsFormOpen(open);
+          if (!open) {
+            setEditingAlvara(null);
+            setIsRenewing(false);
+          }
+        }}
         onSubmit={handleAddAlvara}
         editingAlvara={editingAlvara}
         clientes={clientes}
+        isRenewing={isRenewing}
       />
       {/* Dialog de Finalização */}
       <Dialog open={!!finalizandoAlvara} onOpenChange={(open) => { if (!open) setFinalizandoAlvara(null); }}>

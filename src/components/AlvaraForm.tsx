@@ -24,7 +24,9 @@ import {
 } from '@/components/ui/select';
 import { formatCnpj } from '@/lib/alvara-utils';
 import { Link } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RotateCw } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface AlvaraFormProps {
   open: boolean;
@@ -32,6 +34,7 @@ interface AlvaraFormProps {
   onSubmit: (data: AlvaraFormData) => Promise<void>;
   editingAlvara?: Alvara | null;
   clientes: Cliente[];
+  isRenewing?: boolean;
 }
 
 export function AlvaraForm({
@@ -40,6 +43,7 @@ export function AlvaraForm({
   onSubmit,
   editingAlvara,
   clientes,
+  isRenewing = false,
 }: AlvaraFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,6 +109,42 @@ export function AlvaraForm({
     }
   };
 
+  const handleRenovationFinalized = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      setError(null);
+      await onSubmit({
+        ...formData,
+        processingStatus: 'lançado',
+      });
+      onOpenChange(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao finalizar renovação';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRenovationUpdated = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      setError(null);
+      await onSubmit({
+        ...formData,
+        processingStatus: 'renovacao',
+      });
+      onOpenChange(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar renovação';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatDateForInput = (date?: Date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -116,15 +156,30 @@ export function AlvaraForm({
       <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
-            {editingAlvara ? 'Editar Alvará' : 'Novo Alvará'}
+            {editingAlvara ? (isRenewing ? 'Renovar Alvará' : 'Editar Alvará') : 'Novo Alvará'}
           </DialogTitle>
           <DialogDescription>
-            {editingAlvara
+            {isRenewing
+              ? 'Configure os dados da renovação do alvará'
+              : editingAlvara
               ? 'Atualize as informações do alvará'
               : 'Preencha os dados para cadastrar um novo alvará'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isRenewing && editingAlvara?.expirationDate && (
+            <Alert className="bg-amber-50 border-amber-200">
+              <RotateCw className="h-4 w-4 text-amber-600" />
+              <AlertDescription>
+                <div className="text-amber-900">
+                  <div className="font-semibold">Modo Renovação</div>
+                  <div className="text-sm mt-1">
+                    Vencimento anterior: <span className="font-mono">{format(new Date(editingAlvara.expirationDate), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -242,7 +297,7 @@ export function AlvaraForm({
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-3 flex flex-col-reverse sm:flex-row">
             <Button
               type="button"
               variant="outline"
@@ -251,9 +306,31 @@ export function AlvaraForm({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Salvando...' : editingAlvara ? 'Salvar Alterações' : 'Cadastrar'}
-            </Button>
+            {isRenewing ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={handleRenovationUpdated}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="text-amber-600 border-amber-200 hover:bg-amber-50"
+                >
+                  {isLoading ? 'Salvando...' : 'Renovação Atualizada'}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleRenovationFinalized}
+                  disabled={isLoading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isLoading ? 'Finalizando...' : 'Renovação Finalizada'}
+                </Button>
+              </>
+            ) : (
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Salvando...' : editingAlvara ? 'Salvar Alterações' : 'Cadastrar'}
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>
