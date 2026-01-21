@@ -5,6 +5,12 @@ interface Cidade {
   nome: string;
 }
 
+interface Estado {
+  id: number;
+  nome: string;
+  sigla: string;
+}
+
 export function useCidades(uf: string) {
   const [cidades, setCidades] = useState<Cidade[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +51,7 @@ export function useCidades(uf: string) {
 
         console.log(`[useCidades] UFs encontrados: ${ufs.length}`);
 
-        const estadoSelecionado = ufs.find((estado: any) => estado.sigla === uf.toUpperCase());
+        const estadoSelecionado = ufs.find((estado: Estado) => estado.sigla === uf.toUpperCase());
 
         if (!estadoSelecionado) {
           setError(`Estado ${uf} não encontrado`);
