@@ -22,46 +22,70 @@ export function useCidades(uf: string) {
         setIsLoading(true);
         setError(null);
 
+        console.log(`[useCidades] Buscando cidades para UF: ${uf}`);
+
         // Buscar UF ID primeiro
-        const ufsResponse = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+        const ufsResponse = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
         
         if (!ufsResponse.ok) {
-          throw new Error('Erro ao buscar estados');
+          throw new Error(`Erro ao buscar estados: ${ufsResponse.status} ${ufsResponse.statusText}`);
         }
 
         const ufs = await ufsResponse.json();
         
         if (!Array.isArray(ufs)) {
+          console.error('[useCidades] Resposta não é um array:', ufs);
           throw new Error('Resposta inválida da API de estados');
         }
+
+        console.log(`[useCidades] UFs encontrados: ${ufs.length}`);
 
         const estadoSelecionado = ufs.find((estado: any) => estado.sigla === uf.toUpperCase());
 
         if (!estadoSelecionado) {
-          setError('Estado não encontrado');
+          setError(`Estado ${uf} não encontrado`);
           setCidades([]);
+          console.warn(`[useCidades] Estado ${uf} não encontrado`);
           return;
         }
 
+        console.log(`[useCidades] Estado encontrado: ${estadoSelecionado.nome} (ID: ${estadoSelecionado.id})`);
+
         // Buscar cidades do estado
         const cidadesResponse = await fetch(
-          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoSelecionado.id}/municipios`
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoSelecionado.id}/municipios`,
+          {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            }
+          }
         );
 
         if (!cidadesResponse.ok) {
-          throw new Error('Erro ao buscar cidades');
+          throw new Error(`Erro ao buscar cidades: ${cidadesResponse.status} ${cidadesResponse.statusText}`);
         }
 
         const cidadesData = await cidadesResponse.json();
 
         if (!Array.isArray(cidadesData)) {
+          console.error('[useCidades] Cidades não é um array:', cidadesData);
           throw new Error('Resposta inválida da API de cidades');
         }
+
+        console.log(`[useCidades] Cidades encontradas: ${cidadesData.length}`);
 
         // Validar dados antes de ordenar
         const cidadesValidas = cidadesData.filter(
           (cidade) => cidade && typeof cidade.nome === 'string' && typeof cidade.id === 'number'
         );
+
+        console.log(`[useCidades] Cidades válidas: ${cidadesValidas.length}`);
 
         // Ordenar alfabeticamente com fallback seguro
         const cidadesOrdenadas = cidadesValidas.sort((a: Cidade, b: Cidade) => {
@@ -74,10 +98,11 @@ export function useCidades(uf: string) {
         });
 
         setCidades(cidadesOrdenadas);
+        console.log(`[useCidades] Cidades carregadas com sucesso!`);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Erro ao buscar cidades';
+        const message = err instanceof Error ? err.message : 'Erro desconhecido ao buscar cidades';
         setError(message);
-        console.error('Erro ao buscar cidades:', err);
+        console.error('[useCidades] Erro completo:', err);
         setCidades([]);
       } finally {
         setIsLoading(false);

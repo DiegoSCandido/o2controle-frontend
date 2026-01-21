@@ -133,6 +133,7 @@ export function ClienteForm({
         });
         setAtividades([]);
         setDocumentos([]);
+        setAtividadesSecundariasAPI([]);
       }
     }
   }, [editingCliente, open]);
@@ -188,10 +189,16 @@ export function ClienteForm({
       const cnpjData = await fetchCNPJData(cnpjLimpo);
       if (cnpjData) {
         const novosDados = convertCNPJDataToFormData(cnpjData);
-        setFormData({
-          ...formData,
+        
+        // Formatando CNPJ para exibição
+        const cnpjFormatado = `${cnpjLimpo.substring(0, 2)}.${cnpjLimpo.substring(2, 5)}.${cnpjLimpo.substring(5, 8)}/${cnpjLimpo.substring(8, 12)}-${cnpjLimpo.substring(12)}`;
+        
+        // Fazer um único update com todos os dados
+        setFormData(prev => ({ 
+          ...prev, 
           ...novosDados,
-        });
+          cnpj: cnpjFormatado
+        }));
         
         // Armazenar atividades secundárias da API
         if (cnpjData.atividades_secundarias && cnpjData.atividades_secundarias.length > 0) {
@@ -199,10 +206,6 @@ export function ClienteForm({
         } else {
           setAtividadesSecundariasAPI([]);
         }
-        
-        // Formatando CNPJ para exibição
-        const cnpjFormatado = `${cnpjLimpo.substring(0, 2)}.${cnpjLimpo.substring(2, 5)}.${cnpjLimpo.substring(5, 8)}/${cnpjLimpo.substring(8, 12)}-${cnpjLimpo.substring(12)}`;
-        setFormData(prev => ({ ...prev, cnpj: cnpjFormatado }));
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao buscar CNPJ';
