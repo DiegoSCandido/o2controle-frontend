@@ -51,6 +51,7 @@ export function AlvaraForm({
   const { user } = useAuth();
   const [renewalExpirationDate, setRenewalExpirationDate] = useState('');
   const [isConfirmingRenewal, setIsConfirmingRenewal] = useState(false);
+  const [tempNote, setTempNote] = useState(''); // Campo temporário para nova observação
   // Verificar se é um alvará em abertura (sem data de emissão)
   const isAlvaraEmAbertura = editingAlvara && !editingAlvara.issueDate;
 
@@ -106,6 +107,7 @@ export function AlvaraForm({
         processingStatus: undefined,
         notes: '',
       });
+      setTempNote('');
       setRenewalExpirationDate('');
       setIsConfirmingRenewal(false);
       setError(null);
@@ -119,11 +121,11 @@ export function AlvaraForm({
       setError(null);
       const dataToSubmit = {
         ...formData,
-        notes: formData.notes ? addNoteWithTimestamp(formData.notes) : formData.notes,
       };
       await onSubmit(dataToSubmit);
       // Limpar o campo de notas após salvar (histórico é preservado no BD)
       setFormData(prev => ({ ...prev, notes: '' }));
+      setTempNote('');
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao salvar alvará';
@@ -153,12 +155,12 @@ export function AlvaraForm({
         ...formData,
         type: editingAlvara?.type || formData.type,
         expirationDate: renewalExpirationDate,
-        notes: addNoteWithTimestamp(formData.notes),
         processingStatus: 'lançado' as AlvaraProcessingStatus,
       };
       
       await onSubmit(dataToSubmit);
       setFormData(prev => ({ ...prev, notes: '' }));
+      setTempNote('');
       setRenewalExpirationDate('');
       setIsConfirmingRenewal(false);
       onOpenChange(false);
@@ -179,12 +181,12 @@ export function AlvaraForm({
       const dataToSubmit = {
         ...formData,
         type: editingAlvara?.type || formData.type,
-        notes: addNoteWithTimestamp(formData.notes),
         processingStatus: 'renovacao' as AlvaraProcessingStatus,
       };
       await onSubmit(dataToSubmit);
       // Limpar o campo de notas
       setFormData(prev => ({ ...prev, notes: '' }));
+      setTempNote('');
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar renovação';
@@ -211,6 +213,16 @@ export function AlvaraForm({
     // Se há notas anteriores, adiciona uma quebra de linha
     const previousNotes = editingAlvara?.notes || '';
     return previousNotes ? `${previousNotes}\n\n${noteEntry}` : noteEntry;
+  };
+
+  const handleAddNote = () => {
+    if (!tempNote.trim()) return;
+    
+    // Adiciona a nota temporária ao histórico do formulário
+    const updatedNotes = addNoteWithTimestamp(tempNote);
+    setFormData(prev => ({ ...prev, notes: updatedNotes }));
+    // Limpa o campo temporário
+    setTempNote('');
   };
 
   return (
@@ -358,22 +370,31 @@ export function AlvaraForm({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-xs sm:text-sm">Observações</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              placeholder={isRenewing ? "Adicionar nota sobre a renovação..." : "Informações adicionais..."}
-              className="text-sm"
-              rows={isRenewing ? 3 : 3}
-            />
-            {editingAlvara?.notes && (
+            <Label htmlFor="notes" className="text-xs sm:text-sm">Adicionar Observação</Label>
+            <div className="flex gap-2">
+              <Textarea
+                id="notes"
+                value={tempNote}
+                onChange={(e) => setTempNote(e.target.value)}
+                placeholder={isRenewing ? "Digite uma nota sobre a renovação..." : "Digite uma observação..."}
+                className="text-sm flex-1"
+                rows={2}
+              />
+              <Button
+                type="button"
+                onClick={handleAddNote}
+                disabled={!tempNote.trim() || isLoading}
+                variant="outline"
+                className="self-end"
+              >
+                Adicionar
+              </Button>
+            </div>
+            {formData.notes && (
               <div className="mt-2 pt-2 border-t space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground">Histórico</div>
                 <div className="bg-gray-50 rounded p-2 text-xs space-y-2 max-h-32 overflow-y-auto">
-                  {editingAlvara.notes.split('\n\n').map((note, idx) => (
+                  {formData.notes.split('\n\n').map((note, idx) => (
                     <div key={idx} className="flex items-start gap-2 text-xs">
                       <span className="text-muted-foreground shrink-0 mt-0.5">•</span>
                       <div className="flex-1 min-w-0">
