@@ -70,8 +70,8 @@ export function ClienteForm({
     alvaras: editingCliente?.alvaras || [],
   }));
 
-  // Hook para buscar cidades baseado no UF
-  const { cidades, isLoading: cidadesLoading } = useCidades(formData.uf);
+  // Comentado - usamos apenas a cidade que vem do CNPJ
+  // const { cidades, isLoading: cidadesLoading } = useCidades(formData.uf);
 
   // Estados para atividades secundárias
   const [novaAtividadeCodigo, setNovaAtividadeCodigo] = useState('');
@@ -103,32 +103,6 @@ export function ClienteForm({
     setNovaAtividadeCodigo(codigo);
     setNovaAtividadeDescricao(descricao);
   };
-
-  // Quando as cidades carregam, tenta encontrar a cidade correspondente do CNPJ
-  useEffect(() => {
-    if (cidades.length > 0 && formData.municipio && !cidadesLoading) {
-      // Tenta encontrar a cidade exata
-      const cidadeEncontrada = cidades.find(c => c.nome === formData.municipio);
-      
-      if (!cidadeEncontrada && formData.municipio) {
-        // Se não encontrar exato, tenta normalizar (remover acentos)
-        const normalizarString = (str: string) => 
-          str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
-        
-        const municipioNormalizado = normalizarString(formData.municipio);
-        const cidadeNormalizada = cidades.find(c => 
-          normalizarString(c.nome) === municipioNormalizado
-        );
-        
-        if (cidadeNormalizada) {
-          console.log(`[ClienteForm] Município encontrado (normalizado): ${cidadeNormalizada.nome}`);
-          setFormData(prev => ({ ...prev, municipio: cidadeNormalizada.nome }));
-        } else {
-          console.warn(`[ClienteForm] Município "${formData.municipio}" não encontrado em ${cidades.length} cidades`);
-        }
-      }
-    }
-  }, [cidades, cidadesLoading, formData.municipio]);
 
   useEffect(() => {
     if (open) {
@@ -569,36 +543,15 @@ export function ClienteForm({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="municipio" className="text-xs sm:text-sm">Município</Label>
-                  <Select
+                  <Input
+                    id="municipio"
                     value={formData.municipio}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, municipio: value })
+                    onChange={(e) =>
+                      setFormData({ ...formData, municipio: e.target.value })
                     }
-                    disabled={!formData.uf || cidadesLoading}
-                  >
-                    <SelectTrigger className="text-sm">
-                      <SelectValue placeholder={cidadesLoading ? "Carregando..." : "Selecione um município"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cidades && cidades.length > 0 ? (
-                        cidades
-                          .filter((cidade) => cidade && cidade.id && cidade.nome)
-                          .map((cidade) => (
-                            <SelectItem key={cidade.id} value={cidade.nome}>
-                              {cidade.nome}
-                            </SelectItem>
-                          ))
-                      ) : (
-                        <div className="p-2 text-xs text-muted-foreground">
-                          {!formData.uf ? 'Selecione um estado primeiro' : 'Nenhum município encontrado'}
-                        </div>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {cidadesLoading && <p className="text-xs text-muted-foreground">Carregando cidades...</p>}
-                  {formData.municipio && cidades.length > 0 && !cidades.some(c => c.nome === formData.municipio) && (
-                    <p className="text-xs text-amber-600">⚠️ Município não encontrado na lista. Verifique o estado selecionado.</p>
-                  )}
+                    placeholder="Preenchido automaticamente pelo CNPJ"
+                    className="text-sm"
+                  />
                 </div>
               </div>
 
