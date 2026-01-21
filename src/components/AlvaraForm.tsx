@@ -49,6 +49,8 @@ export function AlvaraForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [renewalExpirationDate, setRenewalExpirationDate] = useState('');
+  const [isConfirmingRenewal, setIsConfirmingRenewal] = useState(false);
   // Verificar se é um alvará em abertura (sem data de emissão)
   const isAlvaraEmAbertura = editingAlvara && !editingAlvara.issueDate;
 
@@ -111,19 +113,34 @@ export function AlvaraForm({
     }
   };
 
-  const handleRenovationFinalized = async (e: React.FormEvent) => {
+  const handleRenovationFinalized = (e: React.FormEvent) => {
     e.preventDefault();
+    // Abrir dialog para solicitar data de vencimento
+    setIsConfirmingRenewal(true);
+  };
+
+  const handleConfirmRenewalFinalized = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      // Em renovação, o tipo já está preenchido do alvará original
+      
+      if (!renewalExpirationDate) {
+        setError('Data de vencimento é obrigatória');
+        return;
+      }
+
       const dataToSubmit = {
         ...formData,
         type: editingAlvara?.type || formData.type,
+        expirationDate: renewalExpirationDate,
         notes: addNoteWithTimestamp(formData.notes),
         processingStatus: 'lançado' as AlvaraProcessingStatus,
       };
+      
       await onSubmit(dataToSubmit);
+      setFormData(prev => ({ ...prev, notes: '' }));
+      setRenewalExpirationDate('');
+      setIsConfirmingRenewal(false);
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao finalizar renovação';
@@ -146,6 +163,8 @@ export function AlvaraForm({
         processingStatus: 'renovacao' as AlvaraProcessingStatus,
       };
       await onSubmit(dataToSubmit);
+      // Limpar o campo de notas
+      setFormData(prev => ({ ...prev, notes: '' }));
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar renovação';
@@ -175,6 +194,7 @@ export function AlvaraForm({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={`w-[95vw] sm:w-full p-4 sm:p-6 ${isRenewing ? 'sm:max-w-[600px]' : 'sm:max-w-[500px]'} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
@@ -386,5 +406,62 @@ export function AlvaraForm({
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Dialog para data de vencimento da renovação */}
+    <Dialog open={isConfirmingRenewal} onOpenChange={setIsConfirmingRenewal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Finalizar Renovação</DialogTitle>
+          <DialogDescription>
+            Informe a data de vencimento do alvará renovado
+          </DialogDescription>
+        </DialogHeader>
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid w-full items-center gap-2">
+          <Label htmlFor="renewal-expiration-date">Data de Vencimento *</Label>
+          <Input
+            id="renewal-expiration-date"
+            type="date"
+            value={renewalExpirationDate}
+            onChange={(e) => {
+              setRenewalExpirationDate(e.target.value);
+              setError(null);
+            }}
+            disabled={isLoading}
+          />
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setIsConfirmingRenewal(false);
+              setRenewalExpirationDate('');
+              setError(null);
+            }}
+            disabled={isLoading}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleConfirmRenewalFinalized}
+            disabled={isLoading || !renewalExpirationDate}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {isLoading ? 'Finalizando...' : 'Confirmar'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
