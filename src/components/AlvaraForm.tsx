@@ -27,6 +27,7 @@ import { Link } from 'react-router-dom';
 import { AlertCircle, RotateCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AlvaraFormProps {
   open: boolean;
@@ -47,6 +48,7 @@ export function AlvaraForm({
 }: AlvaraFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   // Verificar se é um alvará em abertura (sem data de emissão)
   const isAlvaraEmAbertura = editingAlvara && !editingAlvara.issueDate;
 
@@ -118,6 +120,7 @@ export function AlvaraForm({
       const dataToSubmit = {
         ...formData,
         type: editingAlvara?.type || formData.type,
+        notes: addNoteWithTimestamp(formData.notes),
         processingStatus: 'lançado' as AlvaraProcessingStatus,
       };
       await onSubmit(dataToSubmit);
@@ -139,6 +142,7 @@ export function AlvaraForm({
       const dataToSubmit = {
         ...formData,
         type: editingAlvara?.type || formData.type,
+        notes: addNoteWithTimestamp(formData.notes),
         processingStatus: 'renovacao' as AlvaraProcessingStatus,
       };
       await onSubmit(dataToSubmit);
@@ -155,6 +159,19 @@ export function AlvaraForm({
     if (!date) return '';
     const d = new Date(date);
     return d.toISOString().split('T')[0];
+  };
+
+  const addNoteWithTimestamp = (notes: string) => {
+    if (!notes.trim()) return editingAlvara?.notes || '';
+    
+    const now = new Date();
+    const timestamp = format(now, 'dd/MM/yyyy HH:mm', { locale: ptBR });
+    const userName = user?.fullName || 'Usuário';
+    const noteEntry = `[${timestamp} - ${userName}] ${notes}`;
+    
+    // Se há notas anteriores, adiciona uma quebra de linha
+    const previousNotes = editingAlvara?.notes || '';
+    return previousNotes ? `${previousNotes}\n\n${noteEntry}` : noteEntry;
   };
 
   return (
@@ -315,16 +332,17 @@ export function AlvaraForm({
             {isRenewing && editingAlvara?.notes && (
               <div className="mt-2 pt-2 border-t space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground">Histórico</div>
-                <div className="bg-gray-50 rounded p-2 text-xs space-y-1 max-h-32 overflow-y-auto">
-                  <div className="flex items-start gap-2">
-                    <span className="text-muted-foreground shrink-0 mt-0.5">•</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-muted-foreground whitespace-pre-wrap break-words text-xs">
-                        {editingAlvara.notes}
+                <div className="bg-gray-50 rounded p-2 text-xs space-y-2 max-h-32 overflow-y-auto">
+                  {editingAlvara.notes.split('\n\n').map((note, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-xs">
+                      <span className="text-muted-foreground shrink-0 mt-0.5">•</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-muted-foreground whitespace-pre-wrap break-words text-xs">
+                          {note}
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">Anterior</div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
