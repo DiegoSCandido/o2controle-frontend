@@ -103,6 +103,33 @@ export function ClienteForm({
     setNovaAtividadeCodigo(codigo);
     setNovaAtividadeDescricao(descricao);
   };
+
+  // Quando as cidades carregam, tenta encontrar a cidade correspondente do CNPJ
+  useEffect(() => {
+    if (cidades.length > 0 && formData.municipio && !cidadesLoading) {
+      // Tenta encontrar a cidade exata
+      const cidadeEncontrada = cidades.find(c => c.nome === formData.municipio);
+      
+      if (!cidadeEncontrada && formData.municipio) {
+        // Se não encontrar exato, tenta normalizar (remover acentos)
+        const normalizarString = (str: string) => 
+          str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+        
+        const municipioNormalizado = normalizarString(formData.municipio);
+        const cidadeNormalizada = cidades.find(c => 
+          normalizarString(c.nome) === municipioNormalizado
+        );
+        
+        if (cidadeNormalizada) {
+          console.log(`[ClienteForm] Município encontrado (normalizado): ${cidadeNormalizada.nome}`);
+          setFormData(prev => ({ ...prev, municipio: cidadeNormalizada.nome }));
+        } else {
+          console.warn(`[ClienteForm] Município "${formData.municipio}" não encontrado em ${cidades.length} cidades`);
+        }
+      }
+    }
+  }, [cidades, cidadesLoading, formData.municipio]);
+
   useEffect(() => {
     if (open) {
       setError(null);
@@ -189,6 +216,12 @@ export function ClienteForm({
       const cnpjData = await fetchCNPJData(cnpjLimpo);
       if (cnpjData) {
         const novosDados = convertCNPJDataToFormData(cnpjData);
+        
+        console.log('[handleBuscarCNPJ] Dados do CNPJ:', {
+          uf: novosDados.uf,
+          municipio: novosDados.municipio,
+          razaoSocial: novosDados.razaoSocial
+        });
         
         // Formatando CNPJ para exibição
         const cnpjFormatado = `${cnpjLimpo.substring(0, 2)}.${cnpjLimpo.substring(2, 5)}.${cnpjLimpo.substring(5, 8)}/${cnpjLimpo.substring(8, 12)}-${cnpjLimpo.substring(12)}`;
@@ -562,6 +595,10 @@ export function ClienteForm({
                       )}
                     </SelectContent>
                   </Select>
+                  {cidadesLoading && <p className="text-xs text-muted-foreground">Carregando cidades...</p>}
+                  {formData.municipio && cidades.length > 0 && !cidades.some(c => c.nome === formData.municipio) && (
+                    <p className="text-xs text-amber-600">⚠️ Município não encontrado na lista. Verifique o estado selecionado.</p>
+                  )}
                 </div>
               </div>
 
