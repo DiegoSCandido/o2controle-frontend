@@ -79,6 +79,9 @@ const AlvarasPage = () => {
     const alvarasToFilter = activeTab === 'novos' ? novosAlvaras : alvarasEmFuncionamento;
     
     return alvarasToFilter.filter((alvara) => {
+      // Validar que alvara e suas propriedades existem
+      if (!alvara || !alvara.clientName || !alvara.type) return false;
+
       const matchesSearch =
         alvara.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         alvara.clientCnpj.includes(searchTerm) ||

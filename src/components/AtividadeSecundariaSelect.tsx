@@ -38,9 +38,14 @@ export function AtividadeSecundariaSelect({
     } else {
       const q = query.toLowerCase();
       const resultado = ATIVIDADES_SECUNDARIAS_LIST.filter(
-        (opt) =>
-          opt.codigo.toLowerCase().includes(q) ||
-          opt.descricao.toLowerCase().includes(q)
+        (opt) => {
+          // Validar que opt existe e tem propriedades válidas
+          if (!opt || !opt.codigo || !opt.descricao) return false;
+          return (
+            opt.codigo.toLowerCase().includes(q) ||
+            opt.descricao.toLowerCase().includes(q)
+          );
+        }
       );
       setFiltradas(resultado.slice(0, 100)); // Limita a 100 resultados
     }

@@ -544,12 +544,14 @@ export function ClienteForm({
                       <SelectValue placeholder={cidadesLoading ? "Carregando..." : "Selecione um município"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {cidades.length > 0 ? (
-                        cidades.map((cidade) => (
-                          <SelectItem key={cidade.id} value={cidade.nome}>
-                            {cidade.nome}
-                          </SelectItem>
-                        ))
+                      {cidades && cidades.length > 0 ? (
+                        cidades
+                          .filter((cidade) => cidade && cidade.id && cidade.nome)
+                          .map((cidade) => (
+                            <SelectItem key={cidade.id} value={cidade.nome}>
+                              {cidade.nome}
+                            </SelectItem>
+                          ))
                       ) : (
                         <div className="p-2 text-xs text-muted-foreground">
                           {!formData.uf ? 'Selecione um estado primeiro' : 'Nenhum município encontrado'}
