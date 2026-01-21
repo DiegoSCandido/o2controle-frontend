@@ -25,7 +25,7 @@ export function AlvaraProcessingStatusSelect({
       onValueChange={(val) => onValueChange(val as AlvaraProcessingStatus)}
       disabled={disabled}
     >
-      <SelectTrigger className={disabled ? 'bg-muted cursor-not-allowed' : ''}>
+      <SelectTrigger id="processingStatus" className={disabled ? 'bg-muted cursor-not-allowed' : ''}>
         <SelectValue placeholder="Selecione o status" />
       </SelectTrigger>
       <SelectContent>

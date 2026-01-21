@@ -114,10 +114,13 @@ export function AlvaraForm({
     try {
       setIsLoading(true);
       setError(null);
-      await onSubmit({
+      // Em renovação, o tipo já está preenchido do alvará original
+      const dataToSubmit = {
         ...formData,
-        processingStatus: 'lançado',
-      });
+        type: editingAlvara?.type || formData.type,
+        processingStatus: 'lançado' as AlvaraProcessingStatus,
+      };
+      await onSubmit(dataToSubmit);
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao finalizar renovação';
@@ -132,10 +135,13 @@ export function AlvaraForm({
     try {
       setIsLoading(true);
       setError(null);
-      await onSubmit({
+      // Em renovação, o tipo já está preenchido do alvará original
+      const dataToSubmit = {
         ...formData,
-        processingStatus: 'renovacao',
-      });
+        type: editingAlvara?.type || formData.type,
+        processingStatus: 'renovacao' as AlvaraProcessingStatus,
+      };
+      await onSubmit(dataToSubmit);
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar renovação';
@@ -153,7 +159,7 @@ export function AlvaraForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px] p-4 sm:p-6">
+      <DialogContent className={`w-[95vw] sm:w-full p-4 sm:p-6 ${isRenewing ? 'sm:max-w-[600px]' : 'sm:max-w-[500px]'} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>
             {editingAlvara ? (isRenewing ? 'Renovar Alvará' : 'Editar Alvará') : 'Novo Alvará'}
@@ -166,7 +172,7 @@ export function AlvaraForm({
               : 'Preencha os dados para cadastrar um novo alvará'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className={`${isRenewing ? 'space-y-3' : 'space-y-4'}`}>
           {isRenewing && editingAlvara?.expirationDate && (
             <Alert className="bg-amber-50 border-amber-200">
               <RotateCw className="h-4 w-4 text-amber-600" />
@@ -194,7 +200,7 @@ export function AlvaraForm({
               required
               disabled={isAlvaraEmAbertura || isRenewing}
             >
-              <SelectTrigger className={`text-sm ${(isAlvaraEmAbertura || isRenewing) ? 'bg-muted cursor-not-allowed' : ''}`}>
+              <SelectTrigger id="clienteId" className={`text-sm ${(isAlvaraEmAbertura || isRenewing) ? 'bg-muted cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder="Selecione o cliente" />
               </SelectTrigger>
               <SelectContent>
@@ -242,7 +248,7 @@ export function AlvaraForm({
               required
               disabled={!formData.clienteId || tiposPermitidos.length === 0 || isRenewing}
             >
-              <SelectTrigger className={`text-sm ${isRenewing ? 'bg-muted cursor-not-allowed' : ''}`}>
+              <SelectTrigger id="type" className={`text-sm ${isRenewing ? 'bg-muted cursor-not-allowed' : ''}`}>
                 <SelectValue placeholder={formData.clienteId ? (tiposPermitidos.length > 0 ? "Selecione o tipo" : "Nenhum tipo disponível") : "Selecione um cliente"} />
               </SelectTrigger>
               <SelectContent>
@@ -278,6 +284,7 @@ export function AlvaraForm({
               }
               className="text-sm"
               required
+              disabled={isRenewing}
             />
           </div>
 
@@ -303,19 +310,19 @@ export function AlvaraForm({
               }
               placeholder={isRenewing ? "Adicionar nota sobre a renovação..." : "Informações adicionais..."}
               className="text-sm"
-              rows={isRenewing ? 4 : 3}
+              rows={isRenewing ? 3 : 3}
             />
             {isRenewing && editingAlvara?.notes && (
-              <div className="mt-3 pt-3 border-t space-y-2">
-                <div className="text-xs font-semibold text-muted-foreground">Histórico de Observações</div>
-                <div className="bg-gray-50 rounded p-3 text-xs space-y-2 max-h-40 overflow-y-auto">
+              <div className="mt-2 pt-2 border-t space-y-2">
+                <div className="text-xs font-semibold text-muted-foreground">Histórico</div>
+                <div className="bg-gray-50 rounded p-2 text-xs space-y-1 max-h-32 overflow-y-auto">
                   <div className="flex items-start gap-2">
-                    <span className="text-muted-foreground shrink-0">•</span>
-                    <div className="flex-1">
-                      <div className="font-mono text-muted-foreground whitespace-pre-wrap break-words">
+                    <span className="text-muted-foreground shrink-0 mt-0.5">•</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-mono text-muted-foreground whitespace-pre-wrap break-words text-xs">
                         {editingAlvara.notes}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">Anterior</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Anterior</div>
                     </div>
                   </div>
                 </div>
@@ -323,7 +330,7 @@ export function AlvaraForm({
             )}
           </div>
 
-          <DialogFooter className={`gap-2 sm:gap-3 ${isRenewing ? 'flex flex-col sm:flex-row sm:justify-between' : 'flex flex-col-reverse sm:flex-row'}`}>
+          <DialogFooter className={`gap-2 flex flex-col-reverse ${isRenewing ? 'sm:flex-row sm:justify-end' : 'sm:flex-row'}`}>
             <Button
               type="button"
               variant="outline"
@@ -333,13 +340,13 @@ export function AlvaraForm({
               Cancelar
             </Button>
             {isRenewing ? (
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex gap-2 w-full">
                 <Button
                   type="button"
                   onClick={handleRenovationUpdated}
                   disabled={isLoading}
                   variant="outline"
-                  className="flex-1 sm:flex-none text-amber-600 border-amber-200 hover:bg-amber-50"
+                  className="flex-1 text-amber-600 border-amber-200 hover:bg-amber-50"
                 >
                   {isLoading ? 'Salvando...' : 'Renovação Atualizada'}
                 </Button>
@@ -347,7 +354,7 @@ export function AlvaraForm({
                   type="button"
                   onClick={handleRenovationFinalized}
                   disabled={isLoading}
-                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
                 >
                   {isLoading ? 'Finalizando...' : 'Renovação Finalizada'}
                 </Button>
