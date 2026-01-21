@@ -24,6 +24,21 @@ export function StatusBadge({ alvara, status, processingStatus, className }: Sta
     displayProcessingStatus = alvara.processingStatus;
   }
 
+  // Se o alvará está em processo de renovação, mostrar isso independente do status
+  if (displayProcessingStatus === 'renovacao') {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+          'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+          className
+        )}
+      >
+        Em Renovação
+      </span>
+    );
+  }
+
   // Se o alvará tem data de emissão (está em funcionamento), mostrar o status calculado
   // Se não tiver data de emissão (está em abertura), mostrar o processingStatus
   if (status === 'pending' && displayProcessingStatus) {

@@ -95,6 +95,20 @@ export function AlvaraForm({
           notes: '',
         });
       }
+    } else {
+      // Quando o Dialog fecha, resetar o formulário completamente
+      setFormData({
+        clienteId: '',
+        type: '' as AlvaraType,
+        requestDate: new Date(),
+        issueDate: undefined,
+        expirationDate: undefined,
+        processingStatus: undefined,
+        notes: '',
+      });
+      setRenewalExpirationDate('');
+      setIsConfirmingRenewal(false);
+      setError(null);
     }
   }, [editingAlvara, open]);
 
