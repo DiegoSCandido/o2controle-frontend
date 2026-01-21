@@ -393,7 +393,7 @@ export function AlvaraForm({
             {formData.notes && (
               <div className="mt-2 pt-2 border-t space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground">Histórico</div>
-                <div className="bg-gray-50 rounded p-2 text-xs space-y-0 overflow-y-auto max-h-32 border border-gray-200">
+                <div className="bg-gray-50 rounded p-2 text-xs space-y-0 overflow-y-auto max-h-32 border border-gray-200 min-h-fit">
                   {formData.notes.split('\n\n').map((note, idx) => (
                     <div key={idx} className="flex items-start gap-2 text-xs py-1.5 px-1 border-b border-gray-200 last:border-b-0">
                       <span className="text-amber-600 shrink-0 mt-0.5 font-bold">•</span>
