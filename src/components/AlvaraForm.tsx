@@ -103,7 +103,13 @@ export function AlvaraForm({
     try {
       setIsLoading(true);
       setError(null);
-      await onSubmit(formData);
+      const dataToSubmit = {
+        ...formData,
+        notes: formData.notes ? addNoteWithTimestamp(formData.notes) : formData.notes,
+      };
+      await onSubmit(dataToSubmit);
+      // Limpar o campo de notas após salvar (histórico é preservado no BD)
+      setFormData(prev => ({ ...prev, notes: '' }));
       onOpenChange(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao salvar alvará';
@@ -349,7 +355,7 @@ export function AlvaraForm({
               className="text-sm"
               rows={isRenewing ? 3 : 3}
             />
-            {isRenewing && editingAlvara?.notes && (
+            {editingAlvara?.notes && (
               <div className="mt-2 pt-2 border-t space-y-2">
                 <div className="text-xs font-semibold text-muted-foreground">Histórico</div>
                 <div className="bg-gray-50 rounded p-2 text-xs space-y-2 max-h-32 overflow-y-auto">
