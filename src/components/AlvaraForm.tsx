@@ -202,8 +202,8 @@ export function AlvaraForm({
     return d.toISOString().split('T')[0];
   };
 
-  const addNoteWithTimestamp = (notes: string) => {
-    if (!notes.trim()) return editingAlvara?.notes || '';
+  const addNoteWithTimestamp = (notes: string, baseNotes?: string) => {
+    if (!notes.trim()) return baseNotes || editingAlvara?.notes || '';
     
     const now = new Date();
     const timestamp = format(now, 'dd/MM/yyyy HH:mm', { locale: ptBR });
@@ -211,15 +211,15 @@ export function AlvaraForm({
     const noteEntry = `[${timestamp} - ${userName}] ${notes}`;
     
     // Se há notas anteriores, adiciona uma quebra de linha
-    const previousNotes = editingAlvara?.notes || '';
+    const previousNotes = baseNotes || editingAlvara?.notes || '';
     return previousNotes ? `${previousNotes}\n\n${noteEntry}` : noteEntry;
   };
 
   const handleAddNote = () => {
     if (!tempNote.trim()) return;
     
-    // Adiciona a nota temporária ao histórico do formulário
-    const updatedNotes = addNoteWithTimestamp(tempNote);
+    // Adiciona a nota temporária ao histórico do formulário usando formData.notes como base
+    const updatedNotes = addNoteWithTimestamp(tempNote, formData.notes);
     setFormData(prev => ({ ...prev, notes: updatedNotes }));
     // Limpa o campo temporário
     setTempNote('');
