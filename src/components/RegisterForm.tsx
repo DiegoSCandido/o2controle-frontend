@@ -22,47 +22,47 @@ const RegisterForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fullName || !email || !password || !confirmPassword) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: "Erro",
-        description: "As senhas não conferem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!email.includes('@')) {
-      toast({
-        title: "Erro",
-        description: "E-mail inválido",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validar força de senha
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      toast({
-        title: "Senha Fraca",
-        description: passwordValidation.errors.join(". "),
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
+      if (!fullName || !email || !password || !confirmPassword) {
+        toast({
+          title: "Erro",
+          description: "Por favor, preencha todos os campos.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!email.includes('@')) {
+        toast({
+          title: "Erro",
+          description: "E-mail inválido",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        toast({
+          title: "Erro",
+          description: "As senhas não conferem.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar força de senha
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        toast({
+          title: "Senha Fraca",
+          description: passwordValidation.errors.join(". "),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
@@ -98,6 +98,7 @@ const RegisterForm = () => {
       
       navigate("/dashboard");
     } catch (error) {
+      console.error('Erro ao registrar:', error);
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Erro ao registrar",

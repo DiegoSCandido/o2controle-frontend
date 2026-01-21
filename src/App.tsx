@@ -10,6 +10,7 @@ import AlvarasPage from "./pages/Alvaras";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -40,8 +41,8 @@ const AppContent = () => {
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar - mobile: top, desktop: left - hidden on login page */}
       {!isPublicPage && <Sidebar />}
-      {/* Main content */}
-      <div className="flex-1 w-full">
+      {/* Main content - com margin left no desktop para não sobrepor o sidebar fixo */}
+      <div className="flex-1 w-full lg:ml-64">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -56,17 +57,19 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

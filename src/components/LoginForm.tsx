@@ -20,38 +20,38 @@ const LoginForm = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!email || !password) {
-            toast({
-                title: "Erro",
-                description: "Por favor, preencha todos os campos.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        // Validar força de senha
-        const passwordValidation = validatePassword(password);
-        if (!passwordValidation.isValid) {
-            toast({
-                title: "Senha Fraca",
-                description: passwordValidation.errors.join(". "),
-                variant: "destructive",
-            });
-            return;
-        }
-
-        if (!email.includes('@')) {
-            toast({
-                title: "Erro",
-                description: "E-mail inválido",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setIsLoading(true);
-
         try {
+            if (!email || !password) {
+                toast({
+                    title: "Erro",
+                    description: "Por favor, preencha todos os campos.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (!email.includes('@')) {
+                toast({
+                    title: "Erro",
+                    description: "E-mail inválido",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Validar força de senha
+            const passwordValidation = validatePassword(password);
+            if (!passwordValidation.isValid) {
+                toast({
+                    title: "Senha Fraca",
+                    description: passwordValidation.errors.join(". "),
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            setIsLoading(true);
+
             await login(email, password);
             toast({
                 title: "Sucesso",
@@ -59,6 +59,7 @@ const LoginForm = () => {
             });
             navigate("/dashboard");
         } catch (error) {
+            console.error('Erro ao fazer login:', error);
             toast({
                 title: "Erro",
                 description: error instanceof Error ? error.message : "Erro ao fazer login",

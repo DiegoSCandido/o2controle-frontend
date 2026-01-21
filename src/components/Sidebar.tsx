@@ -58,19 +58,19 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <aside className={cn(
-        'fixed lg:relative left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-lg z-40',
+        'fixed lg:fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-lg z-40',
         'transition-transform duration-300 transform lg:transform-none',
         'flex flex-col',
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         'lg:mt-0 mt-16'
       )}>
         {/* Logo/Header - Desktop only */}
-        <div className="p-6 border-b border-slate-200 hidden lg:block">
+        <div className="p-6 border-b border-slate-200 hidden lg:block flex-shrink-0">
           <h1 className="text-2xl font-bold text-slate-900">Menu</h1>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 flex flex-col gap-2 p-6">
+        {/* Navigation Items - com scroll independente */}
+        <nav className="flex-1 flex flex-col gap-2 p-6 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -81,7 +81,7 @@ const Sidebar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
+                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 flex-shrink-0',
                   isActive
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'text-slate-700 hover:bg-slate-100'
@@ -94,8 +94,8 @@ const Sidebar = () => {
           })}
         </nav>
 
-        {/* User Info & Logout */}
-        <div className="border-t border-slate-200 p-6 space-y-4">
+        {/* User Info & Logout - fixo na base */}
+        <div className="border-t border-slate-200 p-6 space-y-4 flex-shrink-0">
           {user && (
             <div className="text-xs text-slate-500 px-1">
               <p className="font-medium text-slate-700 truncate">{user.fullName || user.email}</p>
