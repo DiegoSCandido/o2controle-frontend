@@ -242,34 +242,19 @@ export function ClienteForm({
       const formDataLimpo = {
         ...formData,
         cnpj: limparCNPJ(formData.cnpj),
+        // Incluir atividades secundárias da API se existirem (para novo cliente)
+        ...(atividadesSecundariasAPI.length > 0 && !editingCliente && {
+          atividadesSecundarias: atividadesSecundariasAPI.map(atividade => ({
+            codigo: atividade.code,
+            descricao: atividade.text,
+          }))
+        }),
       };
       
-      // Fazer submit do cliente
+      // Fazer submit do cliente com atividades incluídas no payload
       const result = await onSubmit(formDataLimpo);
       
-      // Se há atividades secundárias da API e é um novo cliente (não está editando)
-      if (atividadesSecundariasAPI.length > 0 && !editingCliente && result) {
-        // Salvar as atividades secundárias automaticamente
-        try {
-          const clienteId = typeof result === 'object' && result.id ? result.id : null;
-          
-          if (clienteId) {
-            for (const atividade of atividadesSecundariasAPI) {
-              try {
-                await atividadeSecundariaAPI.create(clienteId, {
-                  codigo: atividade.code,
-                  descricao: atividade.text,
-                });
-              } catch (err) {
-                console.warn('Erro ao salvar atividade:', err);
-              }
-            }
-            console.log(`✅ ${atividadesSecundariasAPI.length} atividades secundárias salvas automaticamente`);
-          }
-        } catch (atividadeErr) {
-          console.warn('Aviso: Erro ao salvar atividades secundárias', atividadeErr);
-        }
-      }
+      console.log(`✅ Cliente salvo. Atividades já foram persistidas no banco via POST.`);
       
       setAtividadesSecundariasAPI([]);
       onOpenChange(false);

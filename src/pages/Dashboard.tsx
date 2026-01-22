@@ -1,7 +1,12 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientes } from "@/hooks/useClientes";
+import { useAlvaras } from "@/hooks/useAlvaras";
+import { StatCard } from "@/components/StatCard";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { clientes, isLoading: isLoadingClientes } = useClientes();
+  const { alvaras, isLoading: isLoadingAlvaras } = useAlvaras();
 
   return (
     <div className="p-6 sm:p-8 md:p-10">
@@ -18,38 +23,35 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Main Content Area */}
+      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Placeholder Cards - Você pode adicionar conteúdo depois */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Seção 1
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Conteúdo será adicionado em breve...
-          </p>
-        </div>
+        {/* Total de Clientes */}
+        <StatCard
+          title="Total de Clientes"
+          value={clientes.length}
+          isLoading={isLoadingClientes}
+          description="Clientes cadastrados no sistema"
+          variant="default"
+        />
 
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Seção 2
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Conteúdo será adicionado em breve...
-          </p>
-        </div>
+        {/* Total de Alvarás */}
+        <StatCard
+          title="Total de Alvarás"
+          value={alvaras.length}
+          isLoading={isLoadingAlvaras}
+          description="Alvarás em registro"
+          variant="default"
+        />
 
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Seção 3
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Conteúdo será adicionado em breve...
-          </p>
-        </div>
+        {/* Total de Certificados (Futura implementação) */}
+        <StatCard
+          title="Total de Certificados"
+          value={0}
+          isLoading={false}
+          description="Será implementado em breve"
+          variant="default"
+        />
       </div>
-
-      {/* Opção futura de links rapidos */}
     </div>
   );
 };
