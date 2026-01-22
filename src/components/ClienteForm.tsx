@@ -141,13 +141,18 @@ export function ClienteForm({
   const loadAtividades = async (clienteId: string) => {
     try {
       setAtividadesLoading(true);
+      console.log('[loadAtividades] Carregando para cliente:', clienteId);
       const response = await fetch(`${API_BASE_URL}/atividades-secundarias/cliente/${clienteId}`);
+      console.log('[loadAtividades] Status da resposta:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('[loadAtividades] Atividades carregadas:', data);
         setAtividades(data);
+      } else {
+        console.error('[loadAtividades] Erro na resposta:', response.status, response.statusText);
       }
     } catch (err) {
-      console.error('Erro ao carregar atividades:', err);
+      console.error('[loadAtividades] Erro ao carregar atividades:', err);
     } finally {
       setAtividadesLoading(false);
     }
