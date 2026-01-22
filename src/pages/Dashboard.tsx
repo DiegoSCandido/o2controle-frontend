@@ -2,9 +2,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClientes } from "@/hooks/useClientes";
 import { useAlvaras } from "@/hooks/useAlvaras";
 import { StatCard } from "@/components/StatCard";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { clientes, isLoading: isLoadingClientes } = useClientes();
   const { alvaras, isLoading: isLoadingAlvaras } = useAlvaras();
 
@@ -32,6 +34,7 @@ const Dashboard = () => {
           isLoading={isLoadingClientes}
           description="Clientes cadastrados no sistema"
           variant="default"
+          onClick={() => navigate('/clientes')}
         />
 
         {/* Total de Alvarás */}
@@ -41,6 +44,7 @@ const Dashboard = () => {
           isLoading={isLoadingAlvaras}
           description="Alvarás em registro"
           variant="default"
+          onClick={() => navigate('/alvaras')}
         />
 
         {/* Total de Certificados (Futura implementação) */}

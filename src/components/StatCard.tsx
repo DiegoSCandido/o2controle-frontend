@@ -8,6 +8,7 @@ interface StatCardProps {
   variant?: 'pending' | 'valid' | 'expiring' | 'expired' | 'default';
   description?: string;
   isLoading?: boolean;
+  onClick?: () => void;
 }
 
 export function StatCard({ 
@@ -16,10 +17,17 @@ export function StatCard({
   icon: Icon, 
   variant = 'default',
   description,
-  isLoading = false
+  isLoading = false,
+  onClick
 }: StatCardProps) {
   return (
-    <div className="bg-card rounded-lg border p-6 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+    <div 
+      onClick={onClick}
+      className={cn(
+        'bg-card rounded-lg border p-6 shadow-sm hover:shadow-md transition-all animate-fade-in',
+        onClick && 'hover:border-primary/50 cursor-pointer'
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm text-muted-foreground font-medium">{title}</p>
