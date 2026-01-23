@@ -3,10 +3,8 @@ export type AlvaraProcessingStatus = 'lançado' | 'aguardando_cliente' | 'aguard
 
 export const ALVARA_TYPES = [
   'Alvará de Funcionamento',
-  'Alvará Sanitário',
   'Alvará de Bombeiros',
-  'Laudo Acústico',
-  'Licenciamento Ambiental',
+  'Alvará Sanitário',
   'Alvará Polícia Civil',
   'Dispensa de Alvará Sanitário',
 ] as const;
