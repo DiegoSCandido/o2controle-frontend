@@ -142,6 +142,6 @@
   }
 
   .login-card {
-    @apply bg-card border border-border rounded-lg p-8 shadow-lg;
+    @apply bg-card border border-border rounded-lg p-8 shadow-lg mx-auto;
   }
 }
