@@ -25,7 +25,6 @@ const Dashboard = () => {
             {user?.fullName}
           </p>
         </div>
-
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Total de Clientes */}
@@ -59,6 +58,7 @@ const Dashboard = () => {
           />
         </div>
       </div>
+    </div>
     </div>
   );
 };

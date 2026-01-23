@@ -69,7 +69,6 @@ const Sidebar = () => {
         <div className="p-6 border-b border-slate-200 hidden lg:block flex-shrink-0">
           <h1 className="text-2xl font-bold text-slate-900">Menu</h1>
         </div>
-
         {/* Navigation Items - com scroll independente */}
         <nav className="flex-1 flex flex-col gap-2 p-6 overflow-y-auto">
           {navItems.map((item) => {
