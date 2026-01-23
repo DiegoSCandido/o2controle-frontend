@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientesPage from "./pages/Clientes";
 import AlvarasPage from "./pages/Alvaras";
+import CertificadosPage from "./pages/Certificados";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -41,13 +42,14 @@ const AppContent = () => {
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar - mobile: top, desktop: left - hidden on login page */}
       {!isPublicPage && <Sidebar />}
-      {/* Main content - com margin left no desktop para não sobrepor o sidebar fixo */}
-      <div className="flex-1 w-full lg:ml-64">
+      {/* Main content - aplica margin-left no desktop somente quando não for página pública (login) */}
+      <div className={`flex-1 w-full ${!isPublicPage ? "lg:ml-64" : ""}`}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/alvaras" element={<AlvarasPage />} />
+          <Route path="/certificados" element={<CertificadosPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
