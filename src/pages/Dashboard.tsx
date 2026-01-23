@@ -3,6 +3,7 @@ import { useClientes } from "@/hooks/useClientes";
 import { useAlvaras } from "@/hooks/useAlvaras";
 import { StatCard } from "@/components/StatCard";
 import { useNavigate } from "react-router-dom";
+import o2conLogo from '@/assets/o2contole-logo.png';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -11,20 +12,29 @@ const Dashboard = () => {
   const { alvaras, isLoading: isLoadingAlvaras } = useAlvaras();
 
   return (
-    <div className="min-h-screen w-full bg-background px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl py-10 md:py-16">
-        {/* Top spacing for mobile */}
-        <div className="mt-20 lg:mt-0" />
+    <div className="min-h-screen bg-background">
 
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-            Bem-vindo
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            {user?.fullName}
-          </p>
+      {/* Header (same as Clientes/Alvarás pages, no action button) */}
+      <header className="bg-card border-b sticky top-0 lg:top-0 z-10 lg:mt-0 mt-16">
+        <div className="container px-4 py-3 sm:py-4 lg:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
+              <img
+                src={o2conLogo}
+                alt="O2con Soluções Contábeis"
+                className="h-8 sm:h-10 object-contain"
+              />
+              <div className="hidden sm:block h-8 w-px bg-border" />
+              <div>
+                <h1 className="text-base sm:text-lg font-bold text-foreground">Bem-vindo</h1>
+                <p className="text-xs text-muted-foreground">{user?.fullName}</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <main className="container px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 w-full">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Total de Clientes */}
@@ -57,7 +67,7 @@ const Dashboard = () => {
             onClick={() => navigate('/certificados')}
           />
         </div>
-      </div>
+      </main>
     </div>
   );
 };
