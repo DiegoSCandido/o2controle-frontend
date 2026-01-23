@@ -13,7 +13,7 @@ const Index = () => {
       </div>
 
       {/* Login Container */}
-      <div className="w-full max-w-sm px-4 relative z-10 mx-auto">
+      <div className="w-full max-w-sm px-4 relative z-10 mx-auto login-override">
         {/* Login Card */}
         <div className="login-card">
           {/* Logo Section */}

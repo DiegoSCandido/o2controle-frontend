@@ -144,4 +144,10 @@
   .login-card {
     @apply bg-card border border-border rounded-lg p-8 shadow-lg mx-auto;
   }
+
+  /* Force override for hosting environments where parent layout adds left margin */
+  .login-override {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
