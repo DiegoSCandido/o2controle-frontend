@@ -374,28 +374,23 @@ export function ClienteForm({
       const response = await fetch(documentoClienteAPI.download(doc.id), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!response.ok) throw new Error('Erro ao obter link de download');
-      const data = await response.json();
-      if (data.url) {
-        // Monta o nome do arquivo no padrão desejado
-        const nomeCliente = (editingCliente?.razaoSocial || 'CLIENTE').replace(/[^a-zA-Z0-9]/g, '_');
-        const nomeDocumento = (doc.nomeDocumento || 'DOCUMENTO').replace(/[^a-zA-Z0-9]/g, '_');
-        const nomeFinal = `${nomeCliente}-${nomeDocumento}.pdf`;
+      if (!response.ok) throw new Error('Erro ao baixar documento');
+      const blob = await response.blob();
 
-        // Faz o download com o nome customizado
-        const fileResponse = await fetch(data.url);
-        const blob = await fileResponse.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nomeFinal;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      } else {
-        throw new Error('URL de download não encontrada');
-      }
+      // Monta o nome do arquivo no padrão desejado
+      const nomeCliente = (editingCliente?.razaoSocial || 'CLIENTE').replace(/[^a-zA-Z0-9]/g, '_');
+      const nomeDocumento = (doc.nomeDocumento || 'DOCUMENTO').replace(/[^a-zA-Z0-9]/g, '_');
+      const nomeFinal = `${nomeCliente}-${nomeDocumento}.pdf`;
+
+      // Faz o download com o nome customizado
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeFinal;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       alert('Erro ao baixar documento.');
     }
